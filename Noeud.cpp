@@ -13,7 +13,7 @@ int Point::calculerDistanceCoordonnes(int q1, int r1, int q2, int r2) {
     return p1.calculerDistance(p2);
 }
 
-Noeud::Noeud(Point point, TyleType type): point{point}, type{type}
+Noeud::Noeud(Point point, TileType type): point{point}, type{type}
 {
     
 }

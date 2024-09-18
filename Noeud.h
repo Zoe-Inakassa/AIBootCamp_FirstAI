@@ -26,27 +26,27 @@ struct Point {
     int calculerHash(){ return q * 1000000 + r;}
 };
 
-enum class TyleType{Unknown, Default, Goal, Forbidden};
+enum class TileType{Unknown, Default, Goal, Forbidden};
 
 class Noeud {
 public:
     const Point point;
     
 private:
-    TyleType type;
+    TileType type;
     std::vector<Noeud*> neighbours;
 
 public:
     Noeud() = delete;
-    Noeud(Point point, TyleType type);
+    Noeud(Point point, TileType type);
     ~Noeud() = default;
     
-    TyleType type1() const
+    TileType type1() const
     {
         return type;
     }
     
-    void set_type(TyleType type)
+    void set_type(TileType type)
     {
         this->type = type;
     }
