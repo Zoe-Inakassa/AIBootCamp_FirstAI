@@ -1,7 +1,6 @@
 #pragma once
 
-// #include "Noeud.h"
-class Noeud; // TODO
+#include "Noeud.h"
 #include "Globals.h"
 #include <vector>
 #include <list>
