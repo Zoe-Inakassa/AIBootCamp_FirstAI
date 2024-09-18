@@ -2,7 +2,7 @@
 /shelf/
 /workspace.xml
 # Rider ignored files
-/.idea
+/.idea/
 /modules.xml
 /projectSettingsUpdater.xml
 /contentModel.xml
@@ -11,3 +11,5 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+/build-solution-x64/
+/Replays/
