@@ -37,6 +37,7 @@ SET( AIBOT_HEADERS
 	NPC.h
 	TurnData.h
 	Noeud.h
+	Board.h
 	
 	#DLL Stuff
 	Interop_API.h	
@@ -52,6 +53,7 @@ SET( AIBOT_SRC
 	MyBotLogic.cpp
 	NPC.cpp
 	Noeud.cpp
+	Board.cpp
 
 	#DLL Stuff
 	dllmain.cpp
