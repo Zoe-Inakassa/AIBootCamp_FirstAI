@@ -34,6 +34,7 @@ SET( AIBOT_HEADERS
 	InitData.h
 	Logger.h
 	MyBotLogic.h
+	NPC.h
 	TurnData.h
 	Noeud.h
 	
@@ -49,6 +50,7 @@ SET( AIBOT_SRC
 	AIBot.cpp
 	Logger.cpp
 	MyBotLogic.cpp
+	NPC.cpp
 	Noeud.cpp
 
 	#DLL Stuff
