@@ -44,8 +44,7 @@ def Play [
     print $"    replayfile = ($replayfile)"
 
     let AIBootCampExe = $"($AIBOOTCAMP2_ENGINE_DIR)/AIBootCamp2.exe"
-    let options = [
-        $AIBootCampExe
+    let options = ([
         $"-dllpath ($AIBOT_PATH)"
         $"-mode match"
         $"-scene ($mapname)"
@@ -56,22 +55,22 @@ def Play [
         $"-turndelay ($TurnTime)"
         "-quit"
         "-batchmode"
-    ]
-
-    let resultat = nu -c ($options | str join ' ')
-    print $resultat
+    ] | str join ' ')
     
-    if ($env.LAST_EXIT_CODE == 0) {
+    let $result = (nu -n --no-history -c $"($AIBootCampExe) ($options)" | complete)
+    print $result
+
+    if ($result.exit_code == 0) {
         print "Match Completed : Victory!"
     } else {
         let exitMessages = {
             "-2": $"Invalid Map Name ($mapname)"
-            "-1": "Match Completed : Failure (-1). Replay might be corrupted."
-            "3": "Match Completed : Failure (3). Replay might be corrupted."
+            "-1": "Match Completed : Failure (-1)"
+            "3": "Match Completed : Failure (3)"
         }
         let message = ($exitMessages
-            | get $env.LAST_EXIT_CODE --ignore-errors
-            | default $"Erreur d'exécution: ($env.LAST_EXIT_CODE)")
+            | get $"($result.exit_code)" --ignore-errors
+            | default $"Erreur d'exécution: ($result.exit_code)")
         print $message
     }
 }
