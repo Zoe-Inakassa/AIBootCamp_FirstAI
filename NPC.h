@@ -4,6 +4,7 @@
 class Noeud; // TODO
 #include "Globals.h"
 #include <vector>
+#include <list>
 
 enum NPCState {
     INIT,
@@ -16,6 +17,7 @@ class NPC
 {
 public:
     NPC(SNPCInfo npc, const Noeud *emplacement);
+    SOrder deplacer(const Noeud *voisin);
 
 private:
     const int id;
