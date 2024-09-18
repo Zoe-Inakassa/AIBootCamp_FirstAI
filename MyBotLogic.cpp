@@ -1,8 +1,12 @@
 #include "MyBotLogic.h"
 
+#include <map>
+
 #include "Globals.h"
 #include "ConfigData.h"
 #include "InitData.h"
+#include "Noeud.h"
+#include "NPC.h"
 #include "TurnData.h"
 
 MyBotLogic::MyBotLogic()
@@ -37,5 +41,22 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 {
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
 
-	//Write Code Here
+	BOT_LOGIC_LOG(mLogger, "1ère boucle", true);
+	for(int i = 0;i < _turnData.npcInfoArraySize; i++)
+	{
+		
+	}
+
+	BOT_LOGIC_LOG(mLogger, "2ème boucle", true);
+	std::map<Noeud, NPC> mouvements;
+	for(int i = 0;i < _turnData.npcInfoArraySize; i++)
+	{
+		
+	}
+
+	BOT_LOGIC_LOG(mLogger, "3ème boucle", true);
+	for (auto& mouvement : mouvements)
+	{
+		mouvement.second.deplacer(&mouvement.first);
+	}
 }
