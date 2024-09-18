@@ -13,3 +13,7 @@
 /dataSources.local.xml
 /build-solution-x64/
 /Replays/
+
+jobfiles.txt
+/build/
+*.submit
