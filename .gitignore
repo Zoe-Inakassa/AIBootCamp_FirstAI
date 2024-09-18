@@ -17,3 +17,4 @@
 jobfiles.txt
 /build/
 *.submit
+/.vscode/
