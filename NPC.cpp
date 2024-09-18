@@ -7,9 +7,7 @@ NPC::NPC(SNPCInfo npc, const Noeud *emplacement)
 
 SOrder NPC::deplacer(const Noeud *noeudVoisin)
 {
-    // TODO
-    // EHexCellDirection direction = emplacement->getDirection(noeudVoisin);
-    EHexCellDirection direction = EHexCellDirection::CENTER;
+    EHexCellDirection direction = emplacement->getDirection(*noeudVoisin);
 
     // Déplacement
     emplacement = noeudVoisin;

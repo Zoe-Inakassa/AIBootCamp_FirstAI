@@ -1,7 +1,6 @@
 #pragma once
 
-// #include "Noeud.h"
-class Noeud; // TODO
+#include "Noeud.h"
 #include "Globals.h"
 #include <vector>
 #include <list>
@@ -18,6 +17,8 @@ class NPC
 public:
     NPC(SNPCInfo npc, const Noeud *emplacement);
     SOrder deplacer(const Noeud *voisin);
+    const Noeud *getEmplacement() const { return emplacement; }
+    const Noeud *getObjectif() const { return objectif; }
 
 private:
     const int id;
