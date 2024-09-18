@@ -18,7 +18,7 @@ Noeud::Noeud(Point point, TyleType type): point{point}, type{type}
     
 }
 
-EHexCellDirection Noeud::getDirection(Noeud& other) const
+EHexCellDirection Noeud::getDirection(const Noeud& other) const
 {
     int deltaQ = other.point.q - point.q;
     int deltaR = other.point.r - point.r;

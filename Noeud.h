@@ -30,15 +30,38 @@ enum class TyleType{Unknown, Default, Goal, Forbidden};
 
 class Noeud {
 public:
-    Point point;
+    const Point point;
+    
+private:
     TyleType type;
     std::vector<Noeud*> neighbours;
 
+public:
     Noeud() = delete;
     Noeud(Point point, TyleType type);
     ~Noeud() = default;
-    EHexCellDirection getDirection(Noeud& other) const;
     
+    TyleType type1() const
+    {
+        return type;
+    }
+    
+    void set_type(TyleType type)
+    {
+        this->type = type;
+    }
+    
+    const std::vector<Noeud*> &neighbours1() const
+    {
+        return neighbours;
+    }
+    
+    void set_neighbours(const std::vector<Noeud*>& neighbours)
+    {
+        this->neighbours = neighbours;
+    }
+    
+    EHexCellDirection getDirection(const Noeud& other) const;
 };
 
 #endif // NOEUD_H
