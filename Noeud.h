@@ -1,6 +1,7 @@
 ﻿#ifndef NOEUD_H
 #define NOEUD_H
 
+#include <stdexcept>
 #include <vector>
 #include "Globals.h"
 
@@ -23,7 +24,9 @@ struct Point {
     
     static int calculerDistanceCoordonnes(int q1, int r1, int q2, int r2);
 
-    int calculerHash(){ return q * 1000000 + r;}
+    int calculerHash(){ return calculerHash(q, r);}
+
+    static int calculerHash(int q, int r){ return q * 1000000 + r;}
 };
 
 enum class TileType{Unknown, Default, Goal, Forbidden};
@@ -33,32 +36,42 @@ public:
     const Point point;
     
 private:
-    TileType type;
+    TileType tiletype;
     std::vector<Noeud*> neighbours;
 
 public:
     Noeud() = delete;
+    Noeud(const STileInfo& info);
     Noeud(Point point, TileType type);
     ~Noeud() = default;
     
-    TileType type1() const
+    TileType getTiletype() const
     {
-        return type;
+        return tiletype;
     }
     
-    void set_type(TileType type)
+    void setTiletype(TileType type)
     {
-        this->type = type;
+        this->tiletype = type;
     }
     
-    const std::vector<Noeud*> &neighbours1() const
+    const std::vector<Noeud*> &getNeighbours() const
     {
         return neighbours;
     }
     
-    void set_neighbours(const std::vector<Noeud*>& neighbours)
+    void addNeighbour(Noeud* neighbour)
     {
-        this->neighbours = neighbours;
+        neighbours.push_back(neighbour);
+    }
+
+    void removeNeighbour(const Noeud* neighbour)
+    {
+        auto p = std::find(neighbours.begin(), neighbours.end(), neighbour);
+        if (p == neighbours.end()) throw std::out_of_range("Noeud::removeNeighbour"); // Erreur a possiblement modifier
+        Noeud* temp = *p;
+        std::swap(*p,neighbours.back());
+        neighbours.pop_back();
     }
     
     EHexCellDirection getDirection(const Noeud& other) const;

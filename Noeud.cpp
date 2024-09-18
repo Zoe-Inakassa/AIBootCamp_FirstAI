@@ -2,18 +2,23 @@
 
 
 int Point::calculerDistance(const Point &destination) const {
-    return (abs(destination.q - q) 
-          + abs(destination.q + destination.r - q - r)
-          + abs(destination.r - r)) / 2;
+    return calculerDistanceCoordonnes(q, r, destination.q, destination.r);
 }
 
 int Point::calculerDistanceCoordonnes(int q1, int r1, int q2, int r2) {
-    Point p1 = Point(q1, r1);
-    Point p2 = Point(q2, r2);
-    return p1.calculerDistance(p2);
+    return (abs(q1 - q2) 
+          + abs(q1 + r1 - q2 - r2)
+          + abs(r1 - r2)) / 2;
 }
 
-Noeud::Noeud(Point point, TileType type): point{point}, type{type}
+Noeud::Noeud(const STileInfo &info): point(info.q, info.r)
+{
+    if(info.type == EHexCellType::Default) tiletype=TileType::Default;
+    if(info.type == EHexCellType::Forbidden) tiletype=TileType::Forbidden;
+    if(info.type == EHexCellType::Goal) tiletype=TileType::Goal;
+}
+
+Noeud::Noeud(Point point, TileType type): point{point}, tiletype{type}
 {
     
 }
