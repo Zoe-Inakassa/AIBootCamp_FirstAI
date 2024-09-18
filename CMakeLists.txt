@@ -21,6 +21,7 @@ SET( AIBOT_BUILDFILES
 	PlayLocalMatch.bat
 	PlayLocalMatch.py
 	rebuild_vis_sln_x64.bat
+	PlayAndReplay.nu
 )
 
 SET( AIBOT_HEADERS 
@@ -32,7 +33,8 @@ SET( AIBOT_HEADERS
 	Globals.h
 	InitData.h
 	Logger.h
-	MyBotLogic.h	
+	MyBotLogic.h
+	NPC.h
 	TurnData.h
 	Noeud.h
 	
@@ -48,6 +50,7 @@ SET( AIBOT_SRC
 	AIBot.cpp
 	Logger.cpp
 	MyBotLogic.cpp
+	NPC.cpp
 	Noeud.cpp
 
 	#DLL Stuff
