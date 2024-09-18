@@ -24,9 +24,9 @@ struct Point {
     
     static int calculerDistanceCoordonnes(int q1, int r1, int q2, int r2);
 
-    int calculerHash(){ return calculerHash(q, r);}
+    int calculerHash() const { return calculerHash(q, r);}
 
-    static int calculerHash(int q, int r){ return q * 1000000 + r;}
+    static int calculerHash(const int q, const int r){ return q * 1000000 + r;}
 };
 
 enum class TileType{Unknown, Default, Goal, Forbidden};
@@ -40,7 +40,10 @@ private:
     std::vector<Noeud*> neighbours;
 
 public:
+    // On delete le constructeur par défaut pour éviter les erreurs
     Noeud() = delete;
+    
+    Noeud(const Noeud& other) = default;
     Noeud(const STileInfo& info);
     Noeud(Point point, TileType type);
     ~Noeud() = default;

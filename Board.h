@@ -15,7 +15,7 @@ public:
 
     Noeud *getNoeud(int id)
     {
-        return &mapnoeuds[id];
+        return &mapnoeuds.at(id);
     }
     
     const std::vector<Noeud*> &getGoals()

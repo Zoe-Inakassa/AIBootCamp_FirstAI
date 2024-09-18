@@ -15,7 +15,7 @@ void Board::initBoard(const SInitData& _initData)
 
         // Enregistrer les goals
         if (pTile->type == EHexCellType::Goal) {
-            goals.push_back(&mapnoeuds[hash]);
+            goals.push_back(&mapnoeuds.at(hash));
         }
     }
 
