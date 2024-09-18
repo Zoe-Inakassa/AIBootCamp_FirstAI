@@ -38,7 +38,42 @@ def Play [
     TurnTime: number = -1 # Maximum time of a turn before timeout, in ms
 ] {
     print $"Exécution de ($mapname)"
-    python PlayLocalMatch.py $mapname $AIBOOTCAMP2_ENGINE_DIR $AIBOT_PATH $TEAM $ConnectToProcessDelay $InitTime $TurnTime
+    let now = (date now)
+    let replayfile = $"($now | format date %Y%m%d_%H%M%S)"
+    print $"    TEAM       = ($TEAM)"
+    print $"    replayfile = ($replayfile)"
+
+    let AIBootCampExe = $"($AIBOOTCAMP2_ENGINE_DIR)/AIBootCamp2.exe"
+    let options = [
+        $AIBootCampExe
+        $"-dllpath ($AIBOT_PATH)"
+        $"-mode match"
+        $"-scene ($mapname)"
+        $"-team ($TEAM)"
+        $"-replayfile ($replayfile)"
+        $"-connecttoprocessdelay ($ConnectToProcessDelay)"
+        $"-initdelay ($InitTime)"
+        $"-turndelay ($TurnTime)"
+        "-quit"
+        "-batchmode"
+    ]
+
+    let resultat = nu -c ($options | str join ' ')
+    print $resultat
+    
+    if ($env.LAST_EXIT_CODE == 0) {
+        print "Match Completed : Victory!"
+    } else {
+        let exitMessages = {
+            "-2": $"Invalid Map Name ($mapname)"
+            "-1": "Match Completed : Failure (-1). Replay might be corrupted."
+            "3": "Match Completed : Failure (3). Replay might be corrupted."
+        }
+        let message = ($exitMessages
+            | get $env.LAST_EXIT_CODE --ignore-errors
+            | default $"Erreur d'exécution: ($env.LAST_EXIT_CODE)")
+        print $message
+    }
 }
 
 # Exécuter sur toutes les map, puis donner un compte rendu
