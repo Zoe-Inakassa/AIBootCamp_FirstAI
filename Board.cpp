@@ -20,5 +20,15 @@ void Board::initBoard(const SInitData& _initData)
     }
 
     // Enregistrer les voisins
-    // A CODER
+    for (auto& noeud : mapnoeuds) {
+        std::vector<Point> points = noeud.second.point.surroundingPoints();
+        for (auto& point : points)
+        {
+            auto adresse = mapnoeuds.find(point.calculerHash());
+            if(adresse !=mapnoeuds.end())
+            {
+                noeud.second.addNeighbour(&(adresse->second));
+            }
+        }
+    }
 }

@@ -27,6 +27,7 @@ struct Point {
     int calculerHash() const { return calculerHash(q, r);}
 
     static int calculerHash(const int q, const int r){ return q * 1000000 + r;}
+    std::vector<Point> surroundingPoints() const;
 };
 
 enum class TileType{Unknown, Default, Goal, Forbidden};

@@ -11,6 +11,13 @@ int Point::calculerDistanceCoordonnes(int q1, int r1, int q2, int r2) {
           + abs(r1 - r2)) / 2;
 }
 
+std::vector<Point> Point::surroundingPoints() const
+{
+    return { Point(q-1, r), Point(q-1, r+1),
+        Point(q, r+1), Point(q+1, r),
+        Point(q+1, r-1), Point(q, r-1)};
+}
+
 Noeud::Noeud(const STileInfo &info): point(info.q, info.r)
 {
     if(info.type == EHexCellType::Default) tiletype=TileType::Default;
