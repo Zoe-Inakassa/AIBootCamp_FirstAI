@@ -34,7 +34,15 @@ void MyBotLogic::Init(const SInitData& _initData)
 {
 	BOT_LOGIC_LOG(mLogger, "Init", true);
 	
-	//Write Code Here
+	// Enregistrer les tiles
+	board.initBoard(_initData);
+
+	// Enregistrer les NPC
+	listeNPC.reserve(_initData.nbNPCs);
+	for (auto pNPC = _initData.npcInfoArray; pNPC < _initData.npcInfoArray + _initData.nbNPCs; ++pNPC) {
+		auto pNoeud = board.getNoeud(Point::calculerHash(pNPC->q, pNPC->r));
+		listeNPC.push_back(NPC{*pNPC, pNoeud});
+	}
 }
 
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)

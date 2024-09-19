@@ -2,6 +2,8 @@
 
 #include "BotLogicIF.h"
 #include "Logger.h"
+#include "Board.h"
+#include "NPC.h"
 
 #ifdef _DEBUG
 #define BOT_LOGIC_DEBUG
@@ -30,4 +32,6 @@ public:
 
 protected:
 	Logger mLogger;
+	Board board;
+	std::vector<NPC> listeNPC;
 };
