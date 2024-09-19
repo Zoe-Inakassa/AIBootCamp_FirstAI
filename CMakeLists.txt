@@ -39,6 +39,7 @@ SET( AIBOT_HEADERS
 	TurnData.h
 	Noeud.h
 	Board.h
+	Dijkstra.h
 	
 	#DLL Stuff
 	Interop_API.h	
@@ -56,6 +57,7 @@ SET( AIBOT_SRC
 	AStar.cpp
 	Noeud.cpp
 	Board.cpp
+    Dijkstra.cpp
 
 	#DLL Stuff
 	dllmain.cpp
