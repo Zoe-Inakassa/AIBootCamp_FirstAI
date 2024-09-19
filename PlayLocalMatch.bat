@@ -12,7 +12,7 @@ rem set TEAM=LesOutardes
 
 set AIBOOTCAMP2_ENGINE_DIR="..\AIBootCamp2-2024.2.01"
 set AIBOT_PATH=".\build-solution-x64\Debug\myfirstaibot.dll"
-set TEAM="Les Architectes"
+set TEAM="LesArchitectes"
 
 rem in s, -1 = default
 set ConnectToProcessDelay=-1
