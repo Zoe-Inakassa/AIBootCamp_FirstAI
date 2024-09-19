@@ -47,11 +47,13 @@ std::vector<const Noeud *> AStar::calculerChemin(const Noeud *depart, const Noeu
 
     // Construction du chemin
     std::vector<const Noeud*> cheminInverse;
-    const Noeud *noeud = arrivee;
-    while (noeud != depart) {
-        cheminInverse.push_back(noeud);
-        noeud = parents.at(noeud);
+    if (parents.count(arrivee)) {
+        const Noeud *noeud = arrivee;
+        while (noeud != depart) {
+            cheminInverse.push_back(noeud);
+            noeud = parents.at(noeud);
+        }
+        cheminInverse.push_back(depart);
     }
-    cheminInverse.push_back(depart);
     return cheminInverse;
 }
