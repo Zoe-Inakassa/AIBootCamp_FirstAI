@@ -11,7 +11,7 @@
 
 let $AIBOOTCAMP2_ENGINE_DIR = "../AIBootCamp2-2024.2.01/Release"
 let $AIBOT_PATH = "./build-solution-x64/Debug/myfirstaibot.dll"
-let $TEAM = "Les Architectes"
+let $TEAM = "LesArchitectes"
 
 # <=================================================
 
