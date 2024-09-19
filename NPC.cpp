@@ -31,12 +31,22 @@ NPCState NPC::getState() const
     return state;
 }
 
-const Noeud* NPC::getNextTileOnPath()
+const Noeud* NPC::getNextTileOnPath() const
 {
     return chemin.back();
 }
 
-void NPC::set_state(NPCState state)
+void NPC::setChemin(std::vector<const Noeud*>& chemin)
+{
+    this->chemin=chemin;
+}
+
+void NPC::setObjectif(const Noeud* objectif)
+{
+    this->objectif = objectif;
+}
+
+void NPC::setState(NPCState state)
 {
     this->state = state;
 }

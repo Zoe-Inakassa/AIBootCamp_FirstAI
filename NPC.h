@@ -19,10 +19,12 @@ public:
     SOrder deplacer(const Noeud *voisin);
     const Noeud *getEmplacement() const { return emplacement; }
     const Noeud *getObjectif() const { return objectif; }
+    void setObjectif(const Noeud* objectif);
     int getId() const;
     NPCState getState() const;
-    void set_state(NPCState state);
-    const Noeud* getNextTileOnPath();
+    void setState(NPCState state);
+    const Noeud* getNextTileOnPath() const;
+    void setChemin(std::vector<const Noeud*>& chemin);
 
 private:
     const int id;
