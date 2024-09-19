@@ -62,6 +62,7 @@ def Play [
 
     if ($result.exit_code == 0) {
         print "Match Completed : Victory!"
+        return true
     } else {
         let exitMessages = {
             "-2": $"Invalid Map Name ($mapname)"
@@ -72,6 +73,7 @@ def Play [
             | get $"($result.exit_code)" --ignore-errors
             | default $"Erreur d'exécution: ($result.exit_code)")
         print $message
+        return false
     }
 }
 
@@ -127,9 +129,10 @@ alias ReplayLast = OpenLastReplay
 # Compiler, lancer la simulation et ouvrir le résultat
 def PlayAndReplay [mapname: string@MapNames] {
     Build
-    Play $mapname
-    print (LastReplay)
-    OpenLastReplay
+    if (Play $mapname) {
+        print (LastReplay)
+        OpenLastReplay
+    }
 }
 
 # Reconstruire le projet pour Visual Studio en x64
