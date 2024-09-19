@@ -11,10 +11,32 @@ SOrder NPC::deplacer(const Noeud *noeudVoisin)
 
     // Déplacement
     emplacement = noeudVoisin;
-
+    
+    if(chemin.back()==noeudVoisin) chemin.pop_back();
+    
     return SOrder{
         EOrderType::Move,
         id,
         direction
     };
+}
+
+int NPC::getId() const
+{
+    return id;
+}
+
+NPCState NPC::getState() const
+{
+    return state;
+}
+
+const Noeud* NPC::getNextTileOnPath()
+{
+    return chemin.back();
+}
+
+void NPC::set_state(NPCState state)
+{
+    this->state = state;
 }

@@ -19,6 +19,10 @@ public:
     SOrder deplacer(const Noeud *voisin);
     const Noeud *getEmplacement() const { return emplacement; }
     const Noeud *getObjectif() const { return objectif; }
+    int getId() const;
+    NPCState getState() const;
+    void set_state(NPCState state);
+    const Noeud* getNextTileOnPath();
 
 private:
     const int id;
