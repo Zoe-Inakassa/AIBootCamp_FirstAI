@@ -21,7 +21,7 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les murs
     for (auto* pObjet = _initData.objectInfoArray; pObjet != _initData.objectInfoArray + _initData.objectInfoArraySize; ++pObjet) {
-        Point pointA{0,0};
+        Point pointA{pObjet->q, pObjet->r};
         int hashA = pointA.calculerHash();
         int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
         if (mapobjets.count(hashMur)) {
@@ -38,7 +38,7 @@ void Board::initBoard(const SInitData& _initData)
         if (!mapnoeuds.count(hashB)) {
             mapnoeuds.insert(std::pair<int, Noeud>(hashB, Noeud(pointB, TileType::Unknown)));
         }
-        Noeud *noeudB = &mapnoeuds.at(hashA);
+        Noeud *noeudB = &mapnoeuds.at(hashB);
 
         mapobjets[hashMur] = {
             noeudA,
