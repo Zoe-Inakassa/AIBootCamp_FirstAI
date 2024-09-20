@@ -76,6 +76,11 @@ public:
     
     void addNeighbour(Noeud* neighbour)
     {
+        for (auto mur : murs) {
+            // Vérifier les murs
+            if (mur->getNoeudOppose(this) == neighbour)
+                return;
+        }
         neighbours.push_back(neighbour);
     }
 

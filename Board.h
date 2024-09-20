@@ -8,6 +8,7 @@
 class Board{
     std::map<int, Noeud> mapnoeuds;
     std::vector<Noeud*> goals;
+    std::map<int, Mur> mapobjets;
     
 public:
     Board();
