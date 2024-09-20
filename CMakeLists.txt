@@ -36,6 +36,7 @@ SET( AIBOT_HEADERS
 	MyBotLogic.h
 	NPC.h
 	AStar.h
+	Mur.h
 	TurnData.h
 	Noeud.h
 	Board.h

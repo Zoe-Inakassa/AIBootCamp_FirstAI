@@ -3,7 +3,9 @@
 
 #include <stdexcept>
 #include <vector>
+#include <set>
 #include "Globals.h"
+#include "Mur.h"
 
 struct Point {
     int q;
@@ -26,7 +28,8 @@ struct Point {
 
     int calculerHash() const { return calculerHash(q, r);}
 
-    static int calculerHash(const int q, const int r){ return q * 1000000 + r;}
+    // 4 bits pour la direction du Mur | q limite [-2^13;2^13-1] | r limite [-2^13;2^13-1]
+    static int calculerHash(const int q, const int r){ return (q << 14) + r; }
     std::vector<Point> surroundingPoints() const;
 };
 
@@ -39,6 +42,7 @@ public:
 private:
     TileType tiletype;
     std::vector<Noeud*> neighbours;
+    std::set<const Mur*> murs;
 
 public:
     // On delete le constructeur par défaut pour éviter les erreurs
@@ -63,9 +67,20 @@ public:
     {
         return neighbours;
     }
+
+    const Noeud *getNeighbour(const EHexCellDirection &dir) const
+    {
+        for (auto neighbour : neighbours) {
+        }
+    }
     
     void addNeighbour(Noeud* neighbour)
     {
+        for (auto mur : murs) {
+            // Vérifier les murs
+            if (mur->getNoeudOppose(this) == neighbour)
+                return;
+        }
         neighbours.push_back(neighbour);
     }
 
@@ -77,8 +92,18 @@ public:
         std::swap(*p,neighbours.back());
         neighbours.pop_back();
     }
+
+    void addMur(const Mur *mur)
+    {
+        murs.insert(mur);
+        const Noeud *oppose = mur->getNoeudOppose(this);
+        auto p = std::find(neighbours.begin(), neighbours.end(), oppose);
+        if (p != neighbours.end()) removeNeighbour(oppose); // TODO: vérification inutile si pas de throw
+        // Peut-être remplacer neighbours par un set ?
+    }
     
     EHexCellDirection getDirection(const Noeud& other) const;
+    Point getPointNeighbour(EHexCellDirection cellDirection) const;
 };
 
 #endif // NOEUD_H
