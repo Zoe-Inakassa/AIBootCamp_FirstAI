@@ -92,13 +92,16 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		if(npc.getState() == NPCState::INIT)
 		{
 			// Appliquer dijkstra et passer a l'état IDLE
-			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb);
+			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb+1);
 			if(!distances.empty())
 			{
 				mapDistances[&npc] = distances;
 				npc.setState(NPCState::IDLE);
+				init = true;
+			}else
+			{
+				BOT_LOGIC_LOG(mLogger, "Un tableau de distances est vide", true);
 			}
-			init = true;
 		}
 	}
 
@@ -133,6 +136,9 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 					mouvements[mouvements[npc.getNextTileOnPath()]->getEmplacement()] = mouvements[npc.getNextTileOnPath()];
 					mouvements[npc.getNextTileOnPath()] = &npc;
 				}
+			}else
+			{
+				mouvements[npc.getNextTileOnPath()] = &npc;
 			}
 		}
 		else
@@ -151,6 +157,6 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	BOT_LOGIC_LOG(mLogger, "3ème boucle", true);
 	for (auto& mouvement : mouvements)
 	{
-		mouvement.second->deplacer(mouvement.first);
+		_orders.push_back(mouvement.second->deplacer(mouvement.first));
 	}
 }

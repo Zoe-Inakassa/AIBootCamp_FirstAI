@@ -15,11 +15,11 @@ set AIBOT_PATH=".\build-solution-x64\Debug\myfirstaibot.dll"
 set TEAM="LesArchitectes"
 
 rem in s, -1 = default
-set ConnectToProcessDelay=-1
+set ConnectToProcessDelay=10
 
 rem in ms, -1 = default
 set InitTime=-1
-set TurnTime=-1
+set TurnTime=5000000
 
 rem <=================================================
 

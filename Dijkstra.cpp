@@ -16,11 +16,11 @@ std::vector<SNoeudDistance> Dijkstra::calculerDistances(const Noeud* depart, int
     if(depart->getTiletype() == TileType::Goal) goals.push_back(SNoeudDistance{depart,0});
     
     // Exploration avec Dijkstra
-    auto pointeur = noeudsAExplorer.begin();
-    while (pointeur!=noeudsAExplorer.end() && pointeur->distancedepart < distanceMax){
+    int index = 0;
+    while (index!=noeudsAExplorer.size() && noeudsAExplorer.at(index).distancedepart < distanceMax){
         // Explorer les voisins (un voisin est forcément accessible)
-        int distance = pointeur->distancedepart + 1;
-        for (auto voisin : pointeur->pnoeud->getNeighbours()) {
+        int distance = noeudsAExplorer.at(index).distancedepart + 1;
+        for (auto voisin : noeudsAExplorer.at(index).pnoeud->getNeighbours()) {
             // Si le noeud est déjà pris en compte ignorer
             if (noeudsVu.count(voisin))
                 continue;
@@ -35,7 +35,7 @@ std::vector<SNoeudDistance> Dijkstra::calculerDistances(const Noeud* depart, int
         }
         
         // Retirer virtuellement le noeud que l'on vient d'explorer
-        ++pointeur;
+        ++index;
     }
     
     return goals;
