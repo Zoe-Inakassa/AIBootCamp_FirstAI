@@ -12,7 +12,7 @@ SOrder NPC::deplacer(const Noeud *noeudVoisin)
     // Déplacement
     emplacement = noeudVoisin;
     
-    if(chemin.back()==noeudVoisin)
+    if(!chemin.empty() && chemin.back()==noeudVoisin)
     {
         chemin.pop_back();
         if(chemin.empty()) state=NPCState::FINISH;

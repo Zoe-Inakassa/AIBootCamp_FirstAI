@@ -36,6 +36,7 @@ EHexCellDirection Noeud::getDirection(const Noeud& other) const
     int deltaR = other.point.r - point.r;
     if (deltaQ + deltaR == 0) {
         // Diagonale NE ou SW
+        if (deltaQ == 0) return CENTER;
         return deltaQ > 0 ? SW : NE;
     }
     else if (deltaQ + deltaR < 0) {

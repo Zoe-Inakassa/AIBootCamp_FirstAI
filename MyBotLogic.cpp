@@ -126,19 +126,26 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		if(npc.getState() == NPCState::MOVING)
 		{
 			// Vérifier si il y a conflit et ajouter le mouvement dans mouvements
-			if(mouvements.count(npc.getNextTileOnPath()))
+			auto noeudSuivant = npc.getNextTileOnPath();
+			if(mouvements.count(noeudSuivant))
 			{
-				if(mouvements[npc.getNextTileOnPath()]->tailleChemin() >= npc.tailleChemin())
+				auto npcSurLeNoeud = mouvements[noeudSuivant];
+				if(npcSurLeNoeud->tailleChemin() > npc.tailleChemin())
 				{
+					// npc ne peut pas bouger
+					// npcDejaSurlaTile reste sur la tile
 					mouvements[npc.getEmplacement()] = &npc;
 				}else
 				{
-					mouvements[mouvements[npc.getNextTileOnPath()]->getEmplacement()] = mouvements[npc.getNextTileOnPath()];
-					mouvements[npc.getNextTileOnPath()] = &npc;
+					// npc se déplace sur la tile
+					// npcDejaSurlaTile reste à sa position
+					mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
+					mouvements[noeudSuivant] = &npc;
 				}
 			}else
 			{
-				mouvements[npc.getNextTileOnPath()] = &npc;
+				// Le noeud est libre, le NPC se déplace
+				mouvements[noeudSuivant] = &npc;
 			}
 		}
 		else
@@ -146,7 +153,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			// Le pion reste sur place car il a finit
 			// il a en théorie toujours la priorité mais il pourrait bloquer le chemin donc faire attention
 			// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
-			if(mouvements.count(npc.getNextTileOnPath()))
+			if(mouvements.count(npc.getEmplacement()))
 			{
 				BOT_LOGIC_LOG(mLogger, "Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
 			}
