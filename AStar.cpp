@@ -30,16 +30,17 @@ std::vector<const Noeud *> AStar::calculerChemin(const Noeud *depart, const Noeu
         noeudsAExplorer.erase(noeud);
 
         // Explorer les voisins (un voisin est forcément accessible)
+        int distance = distancesDepart[noeud] + 1;
         for (auto voisin : noeud->getNeighbours()) {
-            if (distancesDepart.count(voisin))
+            if (distancesDepart.count(voisin) || distancesDepart.at(voisin) <= distance)
                 continue;
             if (voisin->getTiletype() == TileType::Forbidden)
                 continue;
             if (voisin->getTiletype() == TileType::Unknown)
                 continue;
 
-            distancesDepart[voisin] = distancesDepart[noeud] + 1;
-            potentiels[voisin] = distancesDepart[voisin] + calculerHeuristique(voisin, arrivee);
+            distancesDepart[voisin] = distance;
+            potentiels[voisin] = distance + calculerHeuristique(voisin, arrivee);
             parents[voisin] = noeud;
             noeudsAExplorer.insert(voisin);
         }
