@@ -34,4 +34,5 @@ protected:
 	Logger mLogger;
 	Board board;
 	std::vector<NPC> listeNPC;
+	void debugNoeud(const Noeud *noeud);
 };

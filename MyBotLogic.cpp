@@ -1,6 +1,7 @@
 #include "MyBotLogic.h"
 
 #include <map>
+#include <string>
 
 #include "AStar.h"
 #include "Globals.h"
@@ -31,6 +32,23 @@ void MyBotLogic::Configure(const SConfigData& _configData)
 	//Write Code Here
 }
 
+void MyBotLogic::debugNoeud(const Noeud *noeud) {
+	std::string str;
+	str += std::to_string(noeud->point.q);
+	str += ",";
+	str += std::to_string(noeud->point.r);
+	str += ":";
+	switch (noeud->getTiletype()) {
+		case TileType::Default: str += "default"; break;
+		case TileType::Forbidden: str += "forbidden"; break;
+		case TileType::Unknown: str += "unknown"; break;
+		case TileType::Goal: str += "goal"; break;
+	}
+	mLogger.Log(str);
+}
+
+#include "AStar.h"
+#include "Board.h"
 void MyBotLogic::Init(const SInitData& _initData)
 {
 	BOT_LOGIC_LOG(mLogger, "Init", true);
@@ -44,6 +62,28 @@ void MyBotLogic::Init(const SInitData& _initData)
 		auto pNoeud = board.getNoeud(Point::calculerHash(pNPC->q, pNPC->r));
 		listeNPC.push_back(NPC{*pNPC, pNoeud});
 	}
+	
+	// Execution uniquement avec L_011 !
+	// NE PAS MERGE
+	mLogger.Log("Parcours des tiles");
+	for (int r = 0; r < 4; r++) {
+		debugNoeud(board.getNoeud(r));
+	}
+	debugNoeud(board.getGoals().at(0));
+	mLogger.Log("NPC : " + std::to_string(_initData.npcInfoArray[0].q));
+	mLogger.Log("NPC : " + std::to_string(_initData.npcInfoArray[0].r));
+
+	mLogger.Log("goal...");
+	const Noeud *goal = board.getNoeud(Point::calculerHash(2, 2));
+	mLogger.Log("npc...");
+	const Noeud *npc = board.getNoeud(Point::calculerHash(4, 0));
+	mLogger.Log("Execution de A*");
+	auto chemin = AStar::calculerChemin(npc, goal);
+	mLogger.Log("Chemin : ");
+	for (auto noeud : chemin) {
+		debugNoeud(noeud);
+	}
+
 }
 
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
