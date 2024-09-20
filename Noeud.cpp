@@ -47,3 +47,15 @@ EHexCellDirection Noeud::getDirection(const Noeud& other) const
         return deltaQ == 0 ? E : SE;
     }
 }
+
+Point Noeud::getPointNeighbour(EHexCellDirection cellDirection) const
+{
+    switch (cellDirection) {
+        case W: return Point{point.q, point.r - 1};
+        case NW: return Point{point.q - 1, point.r};
+        case NE: return Point{point.q - 1, point.r + 1};
+        case E: return Point{point.q, point.r + 1};
+        case SE: return Point{point.q + 1, point.r};
+        case SW: return Point{point.q + 1, point.r - 1};
+    }
+}
