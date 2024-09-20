@@ -57,7 +57,6 @@ std::vector<const Noeud *> AStar::calculerChemin(const Noeud *depart, const Noeu
             cheminInverse.push_back(noeud);
             noeud = potentiels.at(noeud).noeudPrecedent;
         }
-        cheminInverse.push_back(depart);
     }
     return cheminInverse;
 }
