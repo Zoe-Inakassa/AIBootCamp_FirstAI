@@ -57,5 +57,7 @@ Point Noeud::getPointNeighbour(EHexCellDirection cellDirection) const
         case E: return Point{point.q, point.r + 1};
         case SE: return Point{point.q + 1, point.r};
         case SW: return Point{point.q + 1, point.r - 1};
+        case CENTER: return point;
     }
+    throw std::exception("Unreachable");
 }

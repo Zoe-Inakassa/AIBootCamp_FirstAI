@@ -16,8 +16,4 @@ struct Mur {
     static int calculerHash(int hashPoint, EHexCellDirection direction) {
         return (direction << 28) | hashPoint;
     }
-    
-    int calculerHash() const {
-        return calculerHash(noeudA->point.calculerHash(), noeudA->getDirection(*noeudB));
-    }
 };
