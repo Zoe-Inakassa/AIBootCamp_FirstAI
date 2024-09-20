@@ -25,6 +25,7 @@ public:
     void setState(NPCState state);
     const Noeud* getNextTileOnPath() const;
     void setChemin(std::vector<const Noeud*>& chemin);
+    int tailleChemin() const;
 
 private:
     const int id;

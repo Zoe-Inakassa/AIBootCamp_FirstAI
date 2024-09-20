@@ -107,7 +107,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	
 
 	BOT_LOGIC_LOG(mLogger, "2ème boucle", true);
-	std::map<Noeud*, NPC> mouvements;
+	std::map<const Noeud*, NPC*> mouvements;
 	for(NPC& npc : listeNPC)
 	{
 		// Si a l'état IDLE calculer chemin avec astar et passer en marche
@@ -123,20 +123,34 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		if(npc.getState() == NPCState::MOVING)
 		{
 			// Vérifier si il y a conflit et ajouter le mouvement dans mouvements
-			// A CODER
+			if(mouvements.count(npc.getNextTileOnPath()))
+			{
+				if(mouvements[npc.getNextTileOnPath()]->tailleChemin() >= npc.tailleChemin())
+				{
+					mouvements[npc.getEmplacement()] = &npc;
+				}else
+				{
+					mouvements[mouvements[npc.getNextTileOnPath()]->getEmplacement()] = mouvements[npc.getNextTileOnPath()];
+					mouvements[npc.getNextTileOnPath()] = &npc;
+				}
+			}
 		}
 		else
 		{
 			// Le pion reste sur place car il a finit
 			// il a en théorie toujours la priorité mais il pourrait bloquer le chemin donc faire attention
 			// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
-			// A CODER
+			if(mouvements.count(npc.getNextTileOnPath()))
+			{
+				BOT_LOGIC_LOG(mLogger, "Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
+			}
+			mouvements[npc.getEmplacement()] = &npc;
 		}
 	}
 
 	BOT_LOGIC_LOG(mLogger, "3ème boucle", true);
 	for (auto& mouvement : mouvements)
 	{
-		mouvement.second.deplacer(mouvement.first);
+		mouvement.second->deplacer(mouvement.first);
 	}
 }

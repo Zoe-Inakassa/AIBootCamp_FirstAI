@@ -45,6 +45,11 @@ void NPC::setChemin(std::vector<const Noeud*>& chemin)
     this->chemin=chemin;
 }
 
+int NPC::tailleChemin() const
+{
+    return chemin.size();
+}
+
 void NPC::setObjectif(const Noeud* objectif)
 {
     this->objectif = objectif;
