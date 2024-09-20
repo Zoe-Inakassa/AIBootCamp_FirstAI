@@ -63,7 +63,7 @@ void MyBotLogic::Init(const SInitData& _initData)
 		listeNPC.push_back(NPC{*pNPC, pNoeud});
 	}
 	
-	// Execution uniquement avec L_011 !
+	// Execution uniquement avec L_022 !
 	// NE PAS MERGE
 	mLogger.Log("Parcours des tiles");
 	for (int r = 0; r < 4; r++) {
@@ -74,9 +74,9 @@ void MyBotLogic::Init(const SInitData& _initData)
 	mLogger.Log("NPC : " + std::to_string(_initData.npcInfoArray[0].r));
 
 	mLogger.Log("goal...");
-	const Noeud *goal = board.getNoeud(Point::calculerHash(2, 2));
+	const Noeud *goal = board.getNoeud(Point::calculerHash(0, 4));
 	mLogger.Log("npc...");
-	const Noeud *npc = board.getNoeud(Point::calculerHash(4, 0));
+	const Noeud *npc = board.getNoeud(Point::calculerHash(0, 0));
 	mLogger.Log("Execution de A*");
 	auto chemin = AStar::calculerChemin(npc, goal);
 	mLogger.Log("Chemin : ");
