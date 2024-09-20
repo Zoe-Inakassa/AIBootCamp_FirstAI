@@ -5,6 +5,7 @@
 #include "AStar.h"
 #include "Globals.h"
 #include "ConfigData.h"
+#include "Dijkstra.h"
 #include "InitData.h"
 #include "Noeud.h"
 #include "NPC.h"
@@ -44,6 +45,39 @@ void MyBotLogic::Init(const SInitData& _initData)
 		auto pNoeud = board.getNoeud(Point::calculerHash(pNPC->q, pNPC->r));
 		listeNPC.push_back(NPC{*pNPC, pNoeud});
 	}
+
+	maxTurnNumber = _initData.maxTurnNb;
+}
+
+void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
+{
+	//Attribuer les objectifs
+	if(listeNPC.size() > 1)
+	{
+		NPC& pnpc1= *listeNPC.begin();
+		NPC& pnpc2= *(listeNPC.begin()+1);
+		if(mapDistances.at(&pnpc1)[0].pnoeud == mapDistances.at(&pnpc2)[0].pnoeud)
+		{
+			if(mapDistances.at(&pnpc1)[1].pnoeud > mapDistances.at(&pnpc2)[1].pnoeud)
+			{
+				pnpc1.setObjectif(mapDistances.at(&pnpc1)[0].pnoeud);
+				pnpc2.setObjectif(mapDistances.at(&pnpc2)[1].pnoeud);
+			}else
+			{
+				pnpc1.setObjectif(mapDistances.at(&pnpc1)[1].pnoeud);
+				pnpc2.setObjectif(mapDistances.at(&pnpc2)[0].pnoeud);
+			}
+		}
+		else
+		{
+			pnpc1.setObjectif(mapDistances.at(&pnpc1)[0].pnoeud);
+			pnpc2.setObjectif(mapDistances.at(&pnpc2)[0].pnoeud);
+		}
+	}else
+	{
+		NPC& pnpc= *listeNPC.begin();
+		pnpc.setObjectif(mapDistances.at(&pnpc)[0].pnoeud);
+	}
 }
 
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
@@ -51,14 +85,26 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
 
 	BOT_LOGIC_LOG(mLogger, "1ère boucle", true);
+	std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
+	bool init = false;
 	for(NPC& npc : listeNPC)
 	{
 		if(npc.getState() == NPCState::INIT)
 		{
-			// Appliquer dijkstra et passer a l'état IDLE + modifier l'objectif
-			// A CODER
+			// Appliquer dijkstra et passer a l'état IDLE
+			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb);
+			if(!distances.empty())
+			{
+				mapDistances[&npc] = distances;
+				npc.setState(NPCState::IDLE);
+			}
+			init = true;
 		}
 	}
+
+	// Attribuer les objectifs
+	if(init) attribuerObjectifs(mapDistances);
+	
 
 	BOT_LOGIC_LOG(mLogger, "2ème boucle", true);
 	std::map<Noeud*, NPC> mouvements;

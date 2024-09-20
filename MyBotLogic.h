@@ -15,6 +15,7 @@
 #define BOT_LOGIC_LOG(logger, text, autoEndLine) 0
 #endif
 
+struct SNoeudDistance;
 struct SConfigData;
 struct STurnData;
 
@@ -29,9 +30,11 @@ public:
 	virtual void Configure(const SConfigData& _configData);
 	virtual void Init(const SInitData& _initData);
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
+	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 
 protected:
 	Logger mLogger;
 	Board board;
 	std::vector<NPC> listeNPC;
+	int maxTurnNumber;
 };
