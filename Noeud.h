@@ -29,7 +29,7 @@ struct Point {
     int calculerHash() const { return calculerHash(q, r);}
 
     // 4 bits pour la direction du Mur | q limite [-2^13;2^13-1] | r limite [-2^13;2^13-1]
-    static int calculerHash(const int q, const int r){ return (q << 14) | r; }
+    static int calculerHash(const int q, const int r){ return (q << 14) + r; }
     std::vector<Point> surroundingPoints() const;
 };
 
