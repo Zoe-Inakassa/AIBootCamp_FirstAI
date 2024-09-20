@@ -2,6 +2,12 @@
 
 #include "Noeud.h"
 
+struct SNoeudPotentiel {
+	const Noeud* noeudPrecedent;
+	int distanceDepart;
+	int potentiel;
+};
+
 class AStar {
 public:
     static std::vector<const Noeud*> calculerChemin(const Noeud *depart, const Noeud *arrivee);

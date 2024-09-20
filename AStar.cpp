@@ -1,58 +1,61 @@
 #include "AStar.h"
 #include <map>
 #include <set>
+#include <algorithm>
 
 std::vector<const Noeud *> AStar::calculerChemin(const Noeud *depart, const Noeud *arrivee)
 {
-    std::map<const Noeud*, int> distancesDepart;
-    std::map<const Noeud*, int> potentiels;
-    std::map<const Noeud*, const Noeud*> parents;
-    std::set<const Noeud*> noeudsAExplorer;
+    std::vector<const Noeud*> noeudsAExplorer;
+    std::map<const Noeud*, SNoeudPotentiel> potentiels;
 
-    distancesDepart[depart] = 0;
-    potentiels[depart] = calculerHeuristique(depart, arrivee);
-    noeudsAExplorer.insert(depart);
+    potentiels[depart] = SNoeudPotentiel{
+        nullptr, // Parent
+        0, // Distance
+        calculerHeuristique(depart, arrivee) // Potentiel
+    };
+    noeudsAExplorer.push_back(depart);
 
     // Exploration avec A*
-    while (!noeudsAExplorer.empty() && !parents.count(arrivee)) {
-        // Trouver le noeud avec le potentiel le plus faible
-        int potentiel = INT_MAX;
-        const Noeud *noeud = nullptr;
-        for (auto noeudCandidat : noeudsAExplorer) {
-            int potentielCandidat = potentiels.at(noeudCandidat);
-            if (potentielCandidat < potentiel) {
-                noeud = noeudCandidat;
-                potentiel = potentielCandidat;
-            }
-        }
+    while (!noeudsAExplorer.empty() && !potentiels.count(arrivee)) {
+        // Trier par potentiel décroissant
+        std::sort(noeudsAExplorer.begin(), noeudsAExplorer.end(), [&potentiels](const Noeud *a, const Noeud *b) {
+            return potentiels.at(a).potentiel > potentiels.at(b).potentiel;
+        });
+        // Noeud avec le potentiel le plus faible
+        const Noeud *noeud = noeudsAExplorer.back();
+        const SNoeudPotentiel &infoNoeud = potentiels.at(noeud);
 
         // Retirer le noeud
-        noeudsAExplorer.erase(noeud);
+        noeudsAExplorer.pop_back();
 
         // Explorer les voisins (un voisin est forcément accessible)
-        int distance = distancesDepart[noeud] + 1;
+        int distance = infoNoeud.distanceDepart + 1;
         for (auto voisin : noeud->getNeighbours()) {
-            if (distancesDepart.count(voisin) || distancesDepart.at(voisin) <= distance)
+            // Si le noeud existe et que sa distance au départ est meilleure, ignorer
+            if (potentiels.count(voisin) && potentiels.at(voisin).distanceDepart <= distance)
                 continue;
             if (voisin->getTiletype() == TileType::Forbidden)
                 continue;
             if (voisin->getTiletype() == TileType::Unknown)
                 continue;
 
-            distancesDepart[voisin] = distance;
-            potentiels[voisin] = distance + calculerHeuristique(voisin, arrivee);
-            parents[voisin] = noeud;
-            noeudsAExplorer.insert(voisin);
+            if (!potentiels.count(voisin))
+                noeudsAExplorer.push_back(voisin);
+            potentiels[voisin] = {
+                noeud, // Parent
+                distance, // Distance
+                distance + calculerHeuristique(voisin, arrivee) // Potentiel
+            };
         }
     }
 
     // Construction du chemin
     std::vector<const Noeud*> cheminInverse;
-    if (parents.count(arrivee)) {
+    if (potentiels.count(arrivee)) {
         const Noeud *noeud = arrivee;
         while (noeud != depart) {
             cheminInverse.push_back(noeud);
-            noeud = parents.at(noeud);
+            noeud = potentiels.at(noeud).noeudPrecedent;
         }
         cheminInverse.push_back(depart);
     }
