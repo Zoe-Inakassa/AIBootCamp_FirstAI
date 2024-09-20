@@ -4,10 +4,14 @@
 
 #include "Noeud.h"
 
+struct SNoeudDistance {
+    const Noeud* pnoeud;
+    int distancedepart;
+};
 
 class Dijkstra{
 public:
-    static std::map<const Noeud*, int> calculerChemin(const Noeud* depart);
+    static std::vector<SNoeudDistance> calculerDistances(const Noeud* depart, int distanceMax=100);
 };
 
 #endif
