@@ -45,10 +45,15 @@ void Board::initBoard(const SInitData& _initData)
             }
         }
     }
+    
+    if (goalDecouvert) {
+        calculerDistanceExplorationGoal();
+    }
 }
 
 void Board::updateBoard(const STurnData &_turnData)
 {
+    goalDecouvert = false;
     for(int i=0; i!=_turnData.tileInfoArraySize; i++)
 	{
 		STileInfo tuile = _turnData.tileInfoArray[i];
@@ -66,6 +71,10 @@ void Board::updateBoard(const STurnData &_turnData)
 			addMur(object);
 		}
 	}
+
+    if (goalDecouvert) {
+        calculerDistanceExplorationGoal();
+    }
 }
 
 void Board::addMur(const SObjectInfo& objet)
@@ -122,11 +131,6 @@ void Board::addTile(const STileInfo& tuile)
         if(tuile.type == EHexCellType::Goal) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Goal)));
     }
     //TODO : ajouter les voisins (les murs sont déjà placés)
-
-
-    if (goalDecouvert) {
-        calculerDistanceExplorationGoal();
-    }
 }
 
 void Board::calculerDistanceExplorationGoal()
