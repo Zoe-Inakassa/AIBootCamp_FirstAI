@@ -20,8 +20,14 @@ void Board::initBoard(const SInitData& _initData)
     }
 
     // Enregistrer les murs
-    for (auto* pObjet = _initData.objectInfoArray; pObjet != _initData.objectInfoArray + _initData.objectInfoArraySize; ++pObjet) {
-        addMur(pObjet);
+    for (auto pObjet = _initData.objectInfoArray; pObjet != _initData.objectInfoArray + _initData.objectInfoArraySize; ++pObjet) {
+        Point pointA{pObjet->q, pObjet->r};
+        int hashA = pointA.calculerHash();
+        int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
+        if(!existMur(hashMur))
+        {
+            addMur(*pObjet);
+        }
     }
 
     // Enregistrer les voisins
@@ -38,11 +44,11 @@ void Board::initBoard(const SInitData& _initData)
     }
 }
 
-void Board::addMur(SObjectInfo* pObjet)
+void Board::addMur(const SObjectInfo& objet)
 {
-    Point pointA{pObjet->q, pObjet->r};
+    Point pointA{objet.q, objet.r};
     int hashA = pointA.calculerHash();
-    int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
+    int hashMur = Mur::calculerHash(hashA, objet.cellPosition);
     if (!mapobjets.count(hashMur))
     {
         if (!mapnoeuds.count(hashA)) {
@@ -50,7 +56,7 @@ void Board::addMur(SObjectInfo* pObjet)
         }
             
         Noeud *noeudA = &mapnoeuds.at(hashA);
-        Point pointB = noeudA->getPointNeighbour(pObjet->cellPosition);
+        Point pointB = noeudA->getPointNeighbour(objet.cellPosition);
         int hashB = pointB.calculerHash();
         if (!mapnoeuds.count(hashB)) {
             mapnoeuds.insert(std::pair<int, Noeud>(hashB, Noeud(pointB, TileType::Unknown)));
@@ -67,4 +73,29 @@ void Board::addMur(SObjectInfo* pObjet)
         noeudA->addMur(mur);
         noeudB->addMur(mur);
     }
+}
+
+void Board::addTile(const STileInfo& tuile)
+{
+    Point point = Point{tuile.q, tuile.r};
+    int hash = point.calculerHash();
+    if(existNoeud(hash))
+    {
+        Noeud* noeud = getNoeud(hash);
+        if(noeud->getTiletype() == TileType::Unknown)
+        {
+            if(tuile.type == EHexCellType::Default) noeud->setTiletype(TileType::Default);
+            if(tuile.type == EHexCellType::Forbidden) noeud->setTiletype(TileType::Forbidden);
+            if(tuile.type == EHexCellType::Goal) noeud->setTiletype(TileType::Goal);
+        }else
+        {
+            return;
+        }
+    }else
+    {
+        if(tuile.type == EHexCellType::Default) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Default)));
+        if(tuile.type == EHexCellType::Forbidden) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Forbidden)));
+        if(tuile.type == EHexCellType::Goal) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Goal)));
+    }
+    //TODO : ajouter les voisins (les murs sont déjà placés)
 }

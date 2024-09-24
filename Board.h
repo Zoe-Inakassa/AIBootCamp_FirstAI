@@ -13,8 +13,15 @@ class Board{
 public:
     Board();
     void initBoard(const SInitData &_initData);
-    void addMur(SObjectInfo* pObjet);
+    void addMur(const SObjectInfo& objet);
 
+    bool existMur(int id)
+    {
+        return mapobjets.find(id) != mapobjets.end();
+    };
+    
+    void addTile(const STileInfo& tuile);
+    
     bool existNoeud(int id)
     {
         return mapnoeuds.find(id) != mapnoeuds.end();
