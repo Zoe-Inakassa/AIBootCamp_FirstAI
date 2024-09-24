@@ -22,6 +22,7 @@ struct STurnData;
 enum class EtatBot {Init, Moving, Exploration};
 
 struct SScoreExploration {
+	const Noeud *noeud;
 	int distanceVolNPC;
 	float scoreExploration;
 };
@@ -45,7 +46,8 @@ protected:
 	Logger mLogger;
 	Board board;
 	std::vector<NPC> listeNPC;
-	std::map<const Noeud*,SScoreExploration> scoresExploration;
+	std::vector<SScoreExploration> scoresExploration;
+	std::map<NPC*, std::vector<SNoeudDistance>> mapExplorationDistances;
 	int maxTurnNumber;
 	EtatBot etatBot;
 

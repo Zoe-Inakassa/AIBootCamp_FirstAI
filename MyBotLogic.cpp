@@ -1,6 +1,7 @@
 #include "MyBotLogic.h"
 
 #include <map>
+#include <algorithm>
 
 #include "AStar.h"
 #include "Globals.h"
@@ -126,14 +127,30 @@ void MyBotLogic::calculerScoreExploration()
 			}
 			int distanceMinimum = distanceNPCPlusProche + noeud.second.getDistanceVolGoal();
 			if (distanceMinimum <= nbToursRestants) {
-				scoresExploration[&noeud.second] = {
+				scoresExploration.push_back({
+					&noeud.second,
 					distanceNPCPlusProche,
 					noeud.second.getScoreExploration(distanceNPCPlusProche),
-				};
+				});
 				// Problème pouvant arriver : un npc est proche de 2 tuiles à explorer,
 				// Sans considérer que l'autre NPC est très loin
 			}
 		}
+	}
+
+	// Sélectionner les tuiles à explorer selon le score
+	// TODO : ne pas oublier d'éloigner les NPC pour maximiser l'exploration
+	mapExplorationDistances.clear();
+	for (NPC &npc : listeNPC) {
+		std::vector<SNoeudDistance> distances;
+		const Point &pointNPC = npc.getEmplacement()->point;
+		for (auto& noeud : scoresExploration) {
+			int distance = pointNPC.calculerDistance(noeud.noeud->point);
+			float scoreExploration = noeud.noeud->getScoreExploration(distance);
+			int scoreExplorationEntier = 1000 * scoreExploration; // TODO pas bien
+			distances.push_back({ noeud.noeud, scoreExplorationEntier });
+		}
+		mapExplorationDistances[&npc] = distances;
 	}
 }
 
@@ -227,6 +244,8 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		board.updateBoard(_turnData);
 		
 		// TODO :Décider du prochain mouvement des npcs
+		calculerScoreExploration(); // à voir
+		attribuerObjectifs(mapExplorationDistances);
 	}
 
 	BOT_LOGIC_LOG(mLogger, "Deplacer les NPC", true);
