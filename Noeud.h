@@ -47,7 +47,7 @@ private:
     std::set<Noeud*> neighbours;
     std::set<const Mur*> murs;
     int nbVoisinsUnknown;
-    int heuristiqueDistanceVolGoal;
+    int heuristiqueDistanceVolGoal = 0;
 
 public:
     // On delete le constructeur par défaut pour éviter les erreurs

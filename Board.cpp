@@ -38,9 +38,9 @@ void Board::initBoard(const SInitData& _initData)
         }
     }
     
-    if (goalDecouvert) {
+    //if (goalDecouvert) {
         calculerDistanceExplorationGoal();
-    }
+    //}
 }
 
 void Board::updateBoard(const STurnData &_turnData)
@@ -64,9 +64,9 @@ void Board::updateBoard(const STurnData &_turnData)
 		}
 	}
 
-    if (goalDecouvert) {
+    //if (goalDecouvert) {
         calculerDistanceExplorationGoal();
-    }
+    //}
 }
 
 void Board::addMur(const SObjectInfo& objet)
@@ -156,7 +156,8 @@ void Board::addTile(const STileInfo& tuile)
 void Board::calculerDistanceExplorationGoal()
 {
     // Calculer les distances à vol d'oiseau des cases au goal le plus proche
-    if (goalDecouvert) {
+    //if (goalDecouvert) {
+    if (goals.empty()) return;
         for (auto& noeud : mapnoeuds) {
             // S'il y a un intérêt à explorer
             if (noeud.second.getNbVoisinsUnknown() > 0) {
@@ -171,5 +172,5 @@ void Board::calculerDistanceExplorationGoal()
                 noeud.second.setDistanceVolGoal(distanceGoalPlusProche);
             }
         }
-    }
+    //}
 }

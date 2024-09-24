@@ -118,7 +118,7 @@ void MyBotLogic::calculerScoreExploration()
 
 	for (auto& noeud : board.getNoeuds()) {
 		// S'il y a un intérêt à explorer
-		if (noeud.second.getNbVoisinsUnknown() > 0) {
+		if (noeud.second.getNbVoisinsUnknown() > 0 && noeud.second.getTiletype() != TileType::Unknown) {
 			// Trouver la distance à vol d'oiseau avec le NPC le plus proche
 			int distanceNPCPlusProche = INT_MAX;
 			for (const NPC &npc : listeNPC) {
@@ -159,7 +159,6 @@ void MyBotLogic::calculerScoreExploration()
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
-
 	if(etatBot == EtatBot::Init)
 	{
 		BOT_LOGIC_LOG(mLogger, "1ère boucle: état Init", true);
@@ -185,7 +184,8 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		{
 			attribuerObjectifs(mapDistances);
 			setEtatBot(EtatBot::Moving);
-		}else setEtatBot(EtatBot::Exploration);
+		}else { setEtatBot(EtatBot::Exploration);
+		}
 	}
 	
 
@@ -248,6 +248,56 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		// TODO :Décider du prochain mouvement des npcs
 		calculerScoreExploration(); // à voir
 		attribuerObjectifs(mapExplorationDistances);
+
+		for (NPC& npc : listeNPC)
+		{
+			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
+			if(!chemin.empty())
+			{
+				npc.setChemin(chemin);
+				npc.setState(NPCState::EXPLORATION);
+			}
+			if (npc.getState() == NPCState::EXPLORATION)
+			{
+				// Vérifier s'il y a conflit et ajouter le mouvement dans mouvements
+				auto noeudSuivant = npc.getNextTileOnPath();
+				if (noeudSuivant != nullptr && mouvements.count(noeudSuivant))
+				{
+					auto npcSurLeNoeud = mouvements[noeudSuivant];
+					if (npcSurLeNoeud->tailleChemin() >= npc.tailleChemin())
+					{
+						// npc ne peut pas bouger
+						// npcSurLeNoeud reste sur la tuile
+						mouvements[npc.getEmplacement()] = &npc;
+						if (mouvements.count(npc.getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+					}
+					else
+					{
+						// npc se déplace sur la tuile
+						// npcDejaSurlaTile reste à sa position
+						mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
+						if (mouvements.count(npcSurLeNoeud->getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+						mouvements[noeudSuivant] = &npc;
+					}
+				}
+				else if (noeudSuivant != nullptr)
+				{
+					// Le noeud est libre, le NPC se déplace
+					mouvements[noeudSuivant] = &npc;
+				}
+			}
+			else
+			{
+				// Le pion reste sur place car il a finit
+				// il a en théorie toujours la priorité car aucun npc n'est censé passer sur sa tuile
+				// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
+				if (mouvements.count(npc.getEmplacement()))
+				{
+					BOT_LOGIC_LOG(mLogger, "Erreur: Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
+				}
+				mouvements[npc.getEmplacement()] = &npc;
+			}
+		}
 	}
 
 	BOT_LOGIC_LOG(mLogger, "Deplacer les NPC", true);
