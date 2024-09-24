@@ -43,7 +43,7 @@ public:
     
 private:
     TileType tiletype;
-    std::vector<Noeud*> neighbours;
+    std::set<Noeud*> neighbours;
     std::set<const Mur*> murs;
     int nbVoisinsUnknown;
 
@@ -66,7 +66,7 @@ public:
         this->tiletype = type;
     }
     
-    const std::vector<Noeud*> &getNeighbours() const
+    const std::set<Noeud*> &getNeighbours() const
     {
         return neighbours;
     }
@@ -84,25 +84,19 @@ public:
             if (mur->getNoeudOppose(this) == neighbour)
                 return;
         }
-        neighbours.push_back(neighbour);
+        neighbours.insert(neighbour);
     }
 
     void removeNeighbour(const Noeud* neighbour)
     {
-        auto p = std::find(neighbours.begin(), neighbours.end(), neighbour);
-        if (p == neighbours.end()) throw std::out_of_range("Noeud::removeNeighbour"); // Erreur a possiblement modifier
-        Noeud* temp = *p;
-        std::swap(*p,neighbours.back());
-        neighbours.pop_back();
+        neighbours.erase(const_cast<Noeud*>(neighbour));
     }
 
     void addMur(const Mur *mur)
     {
         murs.insert(mur);
         const Noeud *oppose = mur->getNoeudOppose(this);
-        auto p = std::find(neighbours.begin(), neighbours.end(), oppose);
-        if (p != neighbours.end()) removeNeighbour(oppose); // TODO: vérification inutile si pas de throw
-        // Peut-être remplacer neighbours par un set ?
+        removeNeighbour(oppose);
     }
     
     EHexCellDirection getDirection(const Noeud& other) const;
