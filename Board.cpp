@@ -21,17 +21,34 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les murs
     for (auto* pObjet = _initData.objectInfoArray; pObjet != _initData.objectInfoArray + _initData.objectInfoArraySize; ++pObjet) {
-        Point pointA{pObjet->q, pObjet->r};
-        int hashA = pointA.calculerHash();
-        int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
-        if (mapobjets.count(hashMur)) {
-            // Mur déjà enregistré, ignorer
-            continue;
+        addMur(pObjet);
+    }
+
+    // Enregistrer les voisins
+    for (auto& noeud : mapnoeuds) {
+        std::vector<Point> points = noeud.second.point.surroundingPoints();
+        for (auto& point : points)
+        {
+            auto adresse = mapnoeuds.find(point.calculerHash());
+            if(adresse !=mapnoeuds.end())
+            {
+                noeud.second.addNeighbour(&(adresse->second));
+            }
         }
-        
+    }
+}
+
+void Board::addMur(SObjectInfo* pObjet)
+{
+    Point pointA{pObjet->q, pObjet->r};
+    int hashA = pointA.calculerHash();
+    int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
+    if (!mapobjets.count(hashMur))
+    {
         if (!mapnoeuds.count(hashA)) {
             mapnoeuds.insert(std::pair<int, Noeud>(hashA, Noeud(pointA, TileType::Unknown)));
         }
+            
         Noeud *noeudA = &mapnoeuds.at(hashA);
         Point pointB = noeudA->getPointNeighbour(pObjet->cellPosition);
         int hashB = pointB.calculerHash();
@@ -49,18 +66,5 @@ void Board::initBoard(const SInitData& _initData)
 
         noeudA->addMur(mur);
         noeudB->addMur(mur);
-    }
-
-    // Enregistrer les voisins
-    for (auto& noeud : mapnoeuds) {
-        std::vector<Point> points = noeud.second.point.surroundingPoints();
-        for (auto& point : points)
-        {
-            auto adresse = mapnoeuds.find(point.calculerHash());
-            if(adresse !=mapnoeuds.end())
-            {
-                noeud.second.addNeighbour(&(adresse->second));
-            }
-        }
     }
 }

@@ -13,7 +13,13 @@ class Board{
 public:
     Board();
     void initBoard(const SInitData &_initData);
+    void addMur(SObjectInfo* pObjet);
 
+    bool existNoeud(int id)
+    {
+        return mapnoeuds.find(id) != mapnoeuds.end();
+    }
+    
     Noeud *getNoeud(int id)
     {
         return &mapnoeuds.at(id);
