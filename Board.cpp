@@ -11,15 +11,7 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les tiles pour les trouver rapidement
     for (auto* pTile = _initData.tileInfoArray; pTile != _initData.tileInfoArray + _initData.tileInfoArraySize; ++pTile) {
-        // Enregistrer hash -> tile
-        int hash = Point::calculerHash(pTile->q, pTile->r);
-        mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(*pTile)));
-
-        // Enregistrer les goals
-        if (pTile->type == EHexCellType::Goal) {
-            goals.push_back(&mapnoeuds.at(hash));
-            goalDecouvert = true;
-        }
+        addTile(*pTile);
     }
 
     // Enregistrer les murs
@@ -112,25 +104,53 @@ void Board::addTile(const STileInfo& tuile)
 {
     Point point = Point{tuile.q, tuile.r};
     int hash = point.calculerHash();
+    TileType tiletype;
+    switch (tuile.type) {
+    case Default:
+        tiletype = TileType::Default;
+        break;
+    case Goal:
+        tiletype = TileType::Goal;
+        break;
+    case Forbidden:
+        tiletype = TileType::Forbidden;
+        break;
+    default:
+        throw ExceptionCellTypeInconnu{};
+    }
     if(existNoeud(hash))
     {
         Noeud* noeud = getNoeud(hash);
         if(noeud->getTiletype() == TileType::Unknown)
         {
-            if(tuile.type == EHexCellType::Default) noeud->setTiletype(TileType::Default);
-            if(tuile.type == EHexCellType::Forbidden) noeud->setTiletype(TileType::Forbidden);
-            if(tuile.type == EHexCellType::Goal) noeud->setTiletype(TileType::Goal);
-        }else
+            noeud->setTiletype(tiletype);
+        }
+        else
         {
             return;
         }
     }else
     {
-        if(tuile.type == EHexCellType::Default) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Default)));
-        if(tuile.type == EHexCellType::Forbidden) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Forbidden)));
-        if(tuile.type == EHexCellType::Goal) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Goal)));
+        mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, tiletype)));
     }
+
+    if (tiletype == TileType::Goal) {
+        goalDecouvert = true;
+    }
+
     //TODO : ajouter les voisins (les murs sont déjà placés)
+    Noeud *noeud = getNoeud(hash);
+    if (noeud->getTiletype() != TileType::Unknown) {
+        for (Point pointVoisin : point.surroundingPoints()) {
+            int hashVoisin = pointVoisin.calculerHash();
+            if (!mapnoeuds.count(hashVoisin)) {
+                mapnoeuds.insert(std::pair<int, Noeud>(hashVoisin, Noeud{ pointVoisin, TileType::Unknown }));
+                Noeud *noeudVoisin = getNoeud(hash);
+                noeudVoisin->addNeighbour(noeud);
+                noeud->addNeighbour(noeudVoisin);
+            }
+        }
+    }
 }
 
 void Board::calculerDistanceExplorationGoal()
