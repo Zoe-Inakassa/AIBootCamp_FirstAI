@@ -7,6 +7,8 @@ Board::Board(): mapnoeuds{}, goals{}
 
 void Board::initBoard(const SInitData& _initData)
 {
+    goalDecouvert = false;
+
     // Enregistrer les tiles pour les trouver rapidement
     for (auto* pTile = _initData.tileInfoArray; pTile != _initData.tileInfoArray + _initData.tileInfoArraySize; ++pTile) {
         // Enregistrer hash -> tile
@@ -16,6 +18,7 @@ void Board::initBoard(const SInitData& _initData)
         // Enregistrer les goals
         if (pTile->type == EHexCellType::Goal) {
             goals.push_back(&mapnoeuds.at(hash));
+            goalDecouvert = true;
         }
     }
 
@@ -119,4 +122,30 @@ void Board::addTile(const STileInfo& tuile)
         if(tuile.type == EHexCellType::Goal) mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, TileType::Goal)));
     }
     //TODO : ajouter les voisins (les murs sont déjà placés)
+
+
+    if (goalDecouvert) {
+        calculerDistanceExplorationGoal();
+    }
+}
+
+void Board::calculerDistanceExplorationGoal()
+{
+    // Calculer les distances à vol d'oiseau des cases au goal le plus proche
+    if (goalDecouvert) {
+        for (auto& noeud : mapnoeuds) {
+            // S'il y a un intérêt à explorer
+            if (noeud.second.getNbVoisinsUnknown() > 0) {
+                // Trouver la distance à vol d'oiseau avec le goal le plus proche
+                int distanceGoalPlusProche = INT_MAX;
+                for (Noeud *goal : goals) {
+                    int distance = goal->point.calculerDistance(noeud.second.point);
+                    if (distance < distanceGoalPlusProche) {
+                        distanceGoalPlusProche = distance;
+                    }
+                }
+                noeud.second.setDistanceVolGoal(distanceGoalPlusProche);
+            }
+        }
+    }
 }

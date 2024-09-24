@@ -21,6 +21,11 @@ struct STurnData;
 
 enum class EtatBot {Init, Moving, Exploration};
 
+struct SScoreExploration {
+	int distanceVolNPC;
+	float scoreExploration;
+};
+
 //Custom BotLogic where the AIBot decision making algorithms should be implemented.
 //This class must be instantiated in main.cpp.
 class MyBotLogic : public virtual BotLogicIF
@@ -34,11 +39,13 @@ public:
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
 	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 	void setEtatBot(const EtatBot&);
+	void calculerScoreExploration();
 
 protected:
 	Logger mLogger;
 	Board board;
 	std::vector<NPC> listeNPC;
+	std::map<const Noeud*,SScoreExploration> scoresExploration;
 	int maxTurnNumber;
 	EtatBot etatBot;
 

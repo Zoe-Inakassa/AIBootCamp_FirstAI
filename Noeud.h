@@ -47,6 +47,7 @@ private:
     std::set<Noeud*> neighbours;
     std::set<const Mur*> murs;
     int nbVoisinsUnknown;
+    int heuristiqueDistanceVolGoal;
 
 public:
     // On delete le constructeur par défaut pour éviter les erreurs
@@ -75,6 +76,9 @@ public:
     EHexCellDirection getDirection(const Noeud& other) const;
     Point getPointNeighbour(EHexCellDirection cellDirection) const;
     int getNbVoisinsUnknown() const { return nbVoisinsUnknown; }
+    int getDistanceVolGoal() const { return heuristiqueDistanceVolGoal; }
+    void setDistanceVolGoal(int distance) { heuristiqueDistanceVolGoal = distance; }
+    float getScoreExploration(int distanceNPC) const;
 };
 
 #endif // NOEUD_H

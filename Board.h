@@ -10,6 +10,7 @@ class Board{
     std::map<int, Noeud> mapnoeuds;
     std::vector<Noeud*> goals;
     std::map<int, Mur> mapobjets;
+    bool goalDecouvert;
     
 public:
     Board();
@@ -29,6 +30,8 @@ public:
         return mapnoeuds.find(id) != mapnoeuds.end();
     }
     
+    const std::map<int, Noeud> &getNoeuds() { return mapnoeuds; }
+
     Noeud *getNoeud(int id)
     {
         return &mapnoeuds.at(id);
@@ -38,6 +41,8 @@ public:
     {
         return goals;
     }
+
+    void calculerDistanceExplorationGoal();
 };
 
 #endif // BOARD_H

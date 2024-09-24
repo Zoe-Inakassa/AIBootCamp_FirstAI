@@ -108,6 +108,35 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 	}
 }
 
+void MyBotLogic::calculerScoreExploration()
+{
+	scoresExploration.clear();
+	int nbToursRestants = INT_MAX; // idée?
+
+	for (auto& noeud : board.getNoeuds()) {
+		// S'il y a un intérêt à explorer
+		if (noeud.second.getNbVoisinsUnknown() > 0) {
+			// Trouver la distance à vol d'oiseau avec le NPC le plus proche
+			int distanceNPCPlusProche = INT_MAX;
+			for (const NPC &npc : listeNPC) {
+				int distance = npc.getEmplacement()->point.calculerDistance(noeud.second.point);
+				if (distance < distanceNPCPlusProche) {
+					distanceNPCPlusProche = distance;
+				}
+			}
+			int distanceMinimum = distanceNPCPlusProche + noeud.second.getDistanceVolGoal();
+			if (distanceMinimum <= nbToursRestants) {
+				scoresExploration[&noeud.second] = {
+					distanceNPCPlusProche,
+					noeud.second.getScoreExploration(distanceNPCPlusProche),
+				};
+				// Problème pouvant arriver : un npc est proche de 2 tuiles à explorer,
+				// Sans considérer que l'autre NPC est très loin
+			}
+		}
+	}
+}
+
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
