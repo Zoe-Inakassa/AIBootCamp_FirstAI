@@ -3,6 +3,7 @@
 #include <map>
 
 #include "InitData.h"
+#include "TurnData.h"
 #include "Noeud.h"
 
 class Board{
@@ -13,6 +14,7 @@ class Board{
 public:
     Board();
     void initBoard(const SInitData &_initData);
+    void updateBoard(const STurnData &_turnData);
     void addMur(const SObjectInfo& objet);
 
     bool existMur(int id)

@@ -108,27 +108,6 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 	}
 }
 
-void MyBotLogic::mettreAJourBoard(const STurnData& _turnData)
-{
-	for(int i=0; i!=_turnData.tileInfoArraySize; i++)
-	{
-		STileInfo tuile = _turnData.tileInfoArray[i];
-		board.addTile(tuile);
-	}
-	
-	for(int i=0; i!=_turnData.objectInfoArraySize; i++)
-	{
-		SObjectInfo object = _turnData.objectInfoArray[i];
-		Point pointA{object.q, object.r};
-		int hashA = pointA.calculerHash();
-		int hashMur = Mur::calculerHash(hashA, object.cellPosition);
-		if(!board.existMur(hashMur))
-		{
-			board.addMur(object);
-		}
-	}
-}
-
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
@@ -216,7 +195,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Exploration", true);
 		
 		//Mettre à jour la vision
-		mettreAJourBoard(_turnData);
+		board.updateBoard(_turnData);
 		
 		// TODO :Décider du prochain mouvement des npcs
 	}

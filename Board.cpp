@@ -44,6 +44,27 @@ void Board::initBoard(const SInitData& _initData)
     }
 }
 
+void Board::updateBoard(const STurnData &_turnData)
+{
+    for(int i=0; i!=_turnData.tileInfoArraySize; i++)
+	{
+		STileInfo tuile = _turnData.tileInfoArray[i];
+		addTile(tuile);
+	}
+	
+	for(int i=0; i!=_turnData.objectInfoArraySize; i++)
+	{
+		SObjectInfo object = _turnData.objectInfoArray[i];
+		Point pointA{object.q, object.r};
+		int hashA = pointA.calculerHash();
+		int hashMur = Mur::calculerHash(hashA, object.cellPosition);
+		if(!existMur(hashMur))
+		{
+			addMur(object);
+		}
+	}
+}
+
 void Board::addMur(const SObjectInfo& objet)
 {
     Point pointA{objet.q, objet.r};
