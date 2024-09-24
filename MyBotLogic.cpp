@@ -77,7 +77,9 @@ void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 	}else
 	{
 		NPC& pnpc= *listeNPC.begin();
-		pnpc.setObjectif(mapDistances.at(&pnpc)[0].pnoeud);
+		const std::vector<SNoeudDistance> &distances = mapDistances.at(&pnpc);
+		if (!distances.empty())
+			pnpc.setObjectif(distances.front().pnoeud);
 	}
 }
 
