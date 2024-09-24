@@ -43,6 +43,7 @@ private:
     TileType tiletype;
     std::vector<Noeud*> neighbours;
     std::set<const Mur*> murs;
+    int nbVoisinsUnknown;
 
 public:
     // On delete le constructeur par défaut pour éviter les erreurs
@@ -104,6 +105,8 @@ public:
     
     EHexCellDirection getDirection(const Noeud& other) const;
     Point getPointNeighbour(EHexCellDirection cellDirection) const;
+
+    int getNbVoisinsUnknown() const { return nbVoisinsUnknown; }
 };
 
 #endif // NOEUD_H

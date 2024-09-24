@@ -18,14 +18,14 @@ std::vector<Point> Point::surroundingPoints() const
         Point(q+1, r-1), Point(q, r-1)};
 }
 
-Noeud::Noeud(const STileInfo &info): point(info.q, info.r)
+Noeud::Noeud(const STileInfo &info): point(info.q, info.r), nbVoisinsUnknown{0}
 {
     if(info.type == EHexCellType::Default) tiletype=TileType::Default;
     if(info.type == EHexCellType::Forbidden) tiletype=TileType::Forbidden;
     if(info.type == EHexCellType::Goal) tiletype=TileType::Goal;
 }
 
-Noeud::Noeud(Point point, TileType type): point{point}, tiletype{type}
+Noeud::Noeud(Point point, TileType type): point{point}, tiletype{type}, nbVoisinsUnknown{0}
 {
     
 }
