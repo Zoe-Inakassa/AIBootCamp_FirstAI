@@ -137,7 +137,7 @@ def PlayAndReplay [mapname: string@MapNames] {
 
 # Reconstruire le projet pour Visual Studio en x64
 def RebuildSLN [] {
-    start rebuild_vis_sln_x64.bat
+    rebuild_vis_sln_x64.bat
 }
 
 # Ouvrir le projet avec Visual Studio
