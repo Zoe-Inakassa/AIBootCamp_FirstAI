@@ -11,7 +11,7 @@
 #include "NPC.h"
 #include "TurnData.h"
 
-MyBotLogic::MyBotLogic()
+MyBotLogic::MyBotLogic(): etatBot{EtatBot::Init}
 {
 	//Write Code Here
 }
@@ -80,88 +80,148 @@ void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 	}
 }
 
-void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
+void MyBotLogic::setEtatBot(const EtatBot& etat)
 {
-	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
-
-	BOT_LOGIC_LOG(mLogger, "1ère boucle", true);
-	std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
-	bool init = false;
-	for(NPC& npc : listeNPC)
+	etatBot = etat;
+	if(etat == EtatBot::Exploration) // On presume que le bot était à l'état Init
 	{
-		if(npc.getState() == NPCState::INIT)
+		for(NPC& npc : listeNPC)
 		{
-			// Appliquer dijkstra et passer a l'état IDLE
-			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb+1);
-			if(!distances.empty())
-			{
-				mapDistances[&npc] = distances;
-				npc.setState(NPCState::IDLE);
-				init = true;
-			}else
-			{
-				BOT_LOGIC_LOG(mLogger, "Un tableau de distances est vide", true);
-			}
+			npc.setState(NPCState::EXPLORATION);
 		}
 	}
-
-	// Attribuer les objectifs
-	if(init) attribuerObjectifs(mapDistances);
-	
-
-	BOT_LOGIC_LOG(mLogger, "2ème boucle", true);
-	std::map<const Noeud*, NPC*> mouvements;
-	for(NPC& npc : listeNPC)
+	if(etat == EtatBot::Moving)
 	{
-		// Si a l'état IDLE calculer chemin avec astar et passer en marche
-		if(npc.getState() == NPCState::IDLE)
+		for(NPC& npc : listeNPC)
 		{
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
 			if(!chemin.empty())
 			{
 				npc.setChemin(chemin);
 				npc.setState(NPCState::MOVING);
-			}
-		}
-		if(npc.getState() == NPCState::MOVING)
-		{
-			// Vérifier si il y a conflit et ajouter le mouvement dans mouvements
-			auto noeudSuivant = npc.getNextTileOnPath();
-			if(mouvements.count(noeudSuivant))
-			{
-				auto npcSurLeNoeud = mouvements[noeudSuivant];
-				if(npcSurLeNoeud->tailleChemin() > npc.tailleChemin())
-				{
-					// npc ne peut pas bouger
-					// npcDejaSurlaTile reste sur la tile
-					mouvements[npc.getEmplacement()] = &npc;
-				}else
-				{
-					// npc se déplace sur la tile
-					// npcDejaSurlaTile reste à sa position
-					mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
-					mouvements[noeudSuivant] = &npc;
-				}
 			}else
 			{
-				// Le noeud est libre, le NPC se déplace
-				mouvements[noeudSuivant] = &npc;
+				//ERREUR
+				BOT_LOGIC_LOG(mLogger, "Erreur chemin non trouvé avec Astar", true);
 			}
 		}
-		else
+	}
+}
+
+void MyBotLogic::mettreAJourBoard(const STurnData& _turnData)
+{
+	for(int i=0; i!=_turnData.tileInfoArraySize; i++)
+	{
+		STileInfo tuile = _turnData.tileInfoArray[i];
+		board.addTile(tuile);
+	}
+	
+	for(int i=0; i!=_turnData.objectInfoArraySize; i++)
+	{
+		SObjectInfo object = _turnData.objectInfoArray[i];
+		Point pointA{object.q, object.r};
+		int hashA = pointA.calculerHash();
+		int hashMur = Mur::calculerHash(hashA, object.cellPosition);
+		if(!board.existMur(hashMur))
 		{
-			// Le pion reste sur place car il a finit
-			// il a en théorie toujours la priorité mais il pourrait bloquer le chemin donc faire attention
-			// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
-			if(mouvements.count(npc.getEmplacement()))
+			board.addMur(object);
+		}
+	}
+}
+
+void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
+{
+	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
+
+	if(etatBot == EtatBot::Init)
+	{
+		BOT_LOGIC_LOG(mLogger, "1ère boucle: état Init", true);
+		
+		std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
+		bool erreur = false;
+		for(NPC& npc : listeNPC)
+		{
+			// Appliquer dijkstra et vérifier si au moins un objectif est trouvable dans le nombre de tours impartis
+			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb+1);
+			if(!distances.empty())
 			{
-				BOT_LOGIC_LOG(mLogger, "Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
+				mapDistances[&npc] = distances;
+			}else
+			{
+				erreur = true;
+				BOT_LOGIC_LOG(mLogger, "Un tableau de distances est vide", true);
 			}
-			mouvements[npc.getEmplacement()] = &npc;
+		}
+		
+		// Attribuer les objectifs
+		if(!erreur)
+		{
+			attribuerObjectifs(mapDistances);
+			setEtatBot(EtatBot::Moving);
+		}else setEtatBot(EtatBot::Exploration);
+	}
+	
+
+	std::map<const Noeud*, NPC*> mouvements;
+	if(etatBot == EtatBot::Moving)
+	{
+		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Moving", true);
+		
+		for(NPC& npc : listeNPC)
+		{
+			if(npc.getState() == NPCState::MOVING)
+			{
+				// Vérifier s'il y a conflit et ajouter le mouvement dans mouvements
+				auto noeudSuivant = npc.getNextTileOnPath();
+				if(mouvements.count(noeudSuivant))
+				{
+					auto npcSurLeNoeud = mouvements[noeudSuivant];
+					if(npcSurLeNoeud->tailleChemin() >= npc.tailleChemin())
+					{
+						// npc ne peut pas bouger
+						// npcSurLeNoeud reste sur la tuile
+						mouvements[npc.getEmplacement()] = &npc;
+						if(mouvements.count(npc.getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+					}else
+					{
+						// npc se déplace sur la tuile
+						// npcDejaSurlaTile reste à sa position
+						mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
+						if(mouvements.count(npcSurLeNoeud->getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+						mouvements[noeudSuivant] = &npc;
+					}
+				}else
+				{
+					// Le noeud est libre, le NPC se déplace
+					mouvements[noeudSuivant] = &npc;
+				}
+			}
+			else
+			{
+				// Le pion reste sur place car il a finit
+				// il a en théorie toujours la priorité car aucun npc n'est censé passer sur sa tuile
+				// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
+				if(mouvements.count(npc.getEmplacement()))
+				{
+					BOT_LOGIC_LOG(mLogger, "Erreur: Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
+				}
+				mouvements[npc.getEmplacement()] = &npc;
+			}
 		}
 	}
 
-	BOT_LOGIC_LOG(mLogger, "3ème boucle", true);
+	
+	if(etatBot == EtatBot::Exploration)
+	{
+		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Exploration", true);
+		
+		//Mettre à jour la vision
+		mettreAJourBoard(_turnData);
+		
+		// TODO :Décider du prochain mouvement des npcs
+	}
+
+	BOT_LOGIC_LOG(mLogger, "Deplacer les NPC", true);
 	for (auto& mouvement : mouvements)
 	{
 		_orders.push_back(mouvement.second->deplacer(mouvement.first));
