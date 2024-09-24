@@ -20,9 +20,19 @@ std::vector<Point> Point::surroundingPoints() const
 
 Noeud::Noeud(const STileInfo &info): point(info.q, info.r), nbVoisinsUnknown{0}
 {
-    if(info.type == EHexCellType::Default) tiletype=TileType::Default;
-    if(info.type == EHexCellType::Forbidden) tiletype=TileType::Forbidden;
-    if(info.type == EHexCellType::Goal) tiletype=TileType::Goal;
+    switch (info.type) {
+        case EHexCellType::Default:
+            tiletype=TileType::Default;
+            break;
+        case EHexCellType::Forbidden:
+            tiletype=TileType::Forbidden;
+            break;
+        case EHexCellType::Goal:
+            tiletype=TileType::Goal;
+            break;
+        default:
+            throw ExceptionCellTypeInconnu{};
+    }
 }
 
 Noeud::Noeud(Point point, TileType type): point{point}, tiletype{type}, nbVoisinsUnknown{0}

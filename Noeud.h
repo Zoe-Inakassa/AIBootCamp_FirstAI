@@ -7,6 +7,8 @@
 #include "Globals.h"
 #include "Mur.h"
 
+class ExceptionCellTypeInconnu{};
+
 struct Point {
     int q;
     int r;
