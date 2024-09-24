@@ -68,47 +68,12 @@ public:
     {
         return neighbours;
     }
-
-    const Noeud *getNeighbour(const EHexCellDirection &dir) const
-    {
-        for (auto neighbour : neighbours) {
-        }
-    }
     
-    void addNeighbour(Noeud* neighbour)
-    {
-        if (neighbours.count(neighbour))
-            return;
-        for (auto mur : murs) {
-            // Vérifier les murs
-            if (mur->getNoeudOppose(this) == neighbour)
-                return;
-        }
-        neighbours.insert(neighbour);
-        if (neighbour->getTiletype() == TileType::Unknown)
-            nbVoisinsUnknown++; // Ajouter dans le compteur de unknown
-    }
-
-    void removeNeighbour(const Noeud* neighbour)
-    {
-        auto it = neighbours.find(const_cast<Noeud*>(neighbour));
-        if (it != neighbours.end()) {
-            neighbours.erase(it);
-            if (neighbour->getTiletype() == TileType::Unknown)
-                nbVoisinsUnknown--; // Retirer du compteur de unknown
-        }
-    }
-
-    void addMur(const Mur *mur)
-    {
-        murs.insert(mur);
-        const Noeud *oppose = mur->getNoeudOppose(this);
-        removeNeighbour(oppose);
-    }
-    
+    void addNeighbour(Noeud* neighbour);
+    void removeNeighbour(const Noeud* neighbour);
+    void addMur(const Mur *mur);
     EHexCellDirection getDirection(const Noeud& other) const;
     Point getPointNeighbour(EHexCellDirection cellDirection) const;
-
     int getNbVoisinsUnknown() const { return nbVoisinsUnknown; }
 };
 

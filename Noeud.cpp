@@ -70,6 +70,37 @@ void Noeud::setTiletype(TileType type)
     }
 }
 
+void Noeud::addNeighbour(Noeud* neighbour)
+{
+    if (neighbours.count(neighbour))
+        return;
+    for (auto mur : murs) {
+        // Vérifier les murs
+        if (mur->getNoeudOppose(this) == neighbour)
+            return;
+    }
+    neighbours.insert(neighbour);
+    if (neighbour->getTiletype() == TileType::Unknown)
+        nbVoisinsUnknown++; // Ajouter dans le compteur de unknown
+}
+
+void Noeud::removeNeighbour(const Noeud* neighbour)
+{
+    auto it = neighbours.find(const_cast<Noeud*>(neighbour));
+    if (it != neighbours.end()) {
+        neighbours.erase(it);
+        if (neighbour->getTiletype() == TileType::Unknown)
+            nbVoisinsUnknown--; // Retirer du compteur de unknown
+    }
+}
+
+void Noeud::addMur(const Mur* mur)
+{
+    murs.insert(mur);
+    const Noeud *oppose = mur->getNoeudOppose(this);
+    removeNeighbour(oppose);
+}
+
 EHexCellDirection Noeud::getDirection(const Noeud& other) const
 {
     int deltaQ = other.point.q - point.q;
