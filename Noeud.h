@@ -8,6 +8,7 @@
 #include "Mur.h"
 
 class ExceptionCellTypeInconnu{};
+class ExceptionChangementTileTypeInvalide{};
 
 struct Point {
     int q;
@@ -61,10 +62,7 @@ public:
         return tiletype;
     }
     
-    void setTiletype(TileType type)
-    {
-        this->tiletype = type;
-    }
+    void setTiletype(TileType type);
     
     const std::set<Noeud*> &getNeighbours() const
     {
@@ -79,17 +77,26 @@ public:
     
     void addNeighbour(Noeud* neighbour)
     {
+        if (neighbours.count(neighbour))
+            return;
         for (auto mur : murs) {
             // Vérifier les murs
             if (mur->getNoeudOppose(this) == neighbour)
                 return;
         }
         neighbours.insert(neighbour);
+        if (neighbour->getTiletype() == TileType::Unknown)
+            nbVoisinsUnknown++; // Ajouter dans le compteur de unknown
     }
 
     void removeNeighbour(const Noeud* neighbour)
     {
-        neighbours.erase(const_cast<Noeud*>(neighbour));
+        auto it = neighbours.find(const_cast<Noeud*>(neighbour));
+        if (it != neighbours.end()) {
+            neighbours.erase(it);
+            if (neighbour->getTiletype() == TileType::Unknown)
+                nbVoisinsUnknown--; // Retirer du compteur de unknown
+        }
     }
 
     void addMur(const Mur *mur)
