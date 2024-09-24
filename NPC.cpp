@@ -15,7 +15,7 @@ SOrder NPC::deplacer(const Noeud *noeudVoisin)
     if(!chemin.empty() && chemin.back()==noeudVoisin)
     {
         chemin.pop_back();
-        if(chemin.empty()) state=NPCState::FINISH;
+        if(chemin.empty() && state == NPCState::MOVING) state=NPCState::FINISH;
     }
     
     return SOrder{
@@ -47,7 +47,7 @@ void NPC::setChemin(std::vector<const Noeud*>& chemin)
 
 int NPC::tailleChemin() const
 {
-    return chemin.size();
+    return static_cast<int>(chemin.size());
 }
 
 void NPC::setObjectif(const Noeud* objectif)

@@ -5,9 +5,10 @@
 #include <vector>
 #include <list>
 
-enum NPCState {
+enum class NPCState {
     INIT,
-    IDLE,
+    EXPLORATION_PAUSE,
+    EXPLORATION,
     MOVING,
     FINISH
 };
