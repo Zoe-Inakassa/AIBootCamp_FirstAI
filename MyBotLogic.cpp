@@ -51,36 +51,98 @@ void MyBotLogic::Init(const SInitData& _initData)
 	maxTurnNumber = _initData.maxTurnNb;
 }
 
-void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
+std::pair<NPC*,NPC*> MyBotLogic::realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution) const
 {
-	//Attribuer les objectifs
-	if(listeNPC.size() > 1)
+	std::map<const Noeud*, NPC*> noeuds;
+	for(auto npc : solution)
 	{
-		NPC& pnpc1= *listeNPC.begin();
-		NPC& pnpc2= *(listeNPC.begin()+1);
-		if(mapDistances.at(&pnpc1)[0].pnoeud == mapDistances.at(&pnpc2)[0].pnoeud)
+		if(mapDistances.count(npc.first))
 		{
-			if(mapDistances.at(&pnpc1)[1].pnoeud > mapDistances.at(&pnpc2)[1].pnoeud)
+			const Noeud* noeudATester = mapDistances.at(npc.first)[npc.second].pnoeud;
+			auto it = noeuds.find(noeudATester);
+			if(it!=noeuds.end())
 			{
-				pnpc1.setObjectif(mapDistances.at(&pnpc1)[0].pnoeud);
-				pnpc2.setObjectif(mapDistances.at(&pnpc2)[1].pnoeud);
-			}else
+				return {it->second,npc.first};
+			}
+			noeuds[noeudATester] = npc.first;
+		}
+	}
+	return {nullptr,nullptr};
+}
+
+int MyBotLogic::calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution)
+{
+	std::pair<NPC*,NPC*> npcs = realisable(mapDistances, solution);
+	if(npcs.first == nullptr) //realisable
+	{
+		int max = -1;
+		for(auto npc : solution)
+		{
+			if(!mapDistances.at(npc.first).empty())
 			{
-				pnpc1.setObjectif(mapDistances.at(&pnpc1)[1].pnoeud);
-				pnpc2.setObjectif(mapDistances.at(&pnpc2)[0].pnoeud);
+				int valeur = mapDistances.at(npc.first)[npc.second].distancedepart;
+				if(valeur>max) max = valeur;
 			}
 		}
-		else
-		{
-			pnpc1.setObjectif(mapDistances.at(&pnpc1)[0].pnoeud);
-			pnpc2.setObjectif(mapDistances.at(&pnpc2)[0].pnoeud);
-		}
-	}else
+		return max;
+	}
+	int value1 = -1;
+	int value2 = -1;
+	
+	//Relancer sur le premier conflit
+	std::map<NPC*,int> copiesolution1;
+	if(mapDistances.at(npcs.first).size() > solution.at(npcs.first)+1)
 	{
-		NPC& pnpc= *listeNPC.begin();
-		const std::vector<SNoeudDistance> &distances = mapDistances.at(&pnpc);
-		if (!distances.empty())
-			pnpc.setObjectif(distances.front().pnoeud);
+		copiesolution1 = solution;
+		copiesolution1[npcs.first] = copiesolution1.at(npcs.first)+1;
+		value1 = calculerSolution(mapDistances, copiesolution1);
+	}
+	
+	//Relancer sur le deuxième conflit
+	std::map<NPC*,int> copiesolution2;
+	if(mapDistances.at(npcs.second).size() > solution.at(npcs.second)+1)
+	{
+		copiesolution2 = solution;
+		copiesolution2[npcs.second] = copiesolution2.at(npcs.second)+1;
+		value2 = calculerSolution(mapDistances, copiesolution2);
+	}
+
+	
+	if(value1 == -1)
+	{
+		solution = copiesolution2;
+		return value2;
+	}
+	if(value2 == -1 || value1 < value2)
+	{
+		solution = copiesolution1;
+		return value1;
+	}
+	solution = copiesolution2;
+	return value2;
+}
+
+void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
+{
+	if(mapDistances.empty()) return;
+	//Création d'une solution initiale
+	std::map<NPC*,int> solution;
+	for(auto npc : mapDistances)
+	{
+		solution[npc.first] = 0;
+	}
+
+	int retour = calculerSolution(mapDistances, solution);
+	if(retour == -1)
+	{
+		BOT_LOGIC_LOG(mLogger, "Aucune solution réalisable n'a été trouvée", true);
+		return;
+	}
+	
+	//Attribuer les objectifs
+	for(auto npc : solution)
+	{
+		npc.first->setObjectif(mapDistances.at(npc.first)[npc.second].pnoeud);
 	}
 }
 
@@ -211,7 +273,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		board.updateBoard(_turnData);
 		
 		// TODO :Décider du prochain mouvement des npcs
-		calculerScoreExploration(); // à voir
+		calculerScoreExploration(nbToursRestants); // à voir
 		attribuerObjectifs(mapExplorationDistances);
 
 		BOT_LOGIC_LOG(mLogger, "Score exploration :", true);
