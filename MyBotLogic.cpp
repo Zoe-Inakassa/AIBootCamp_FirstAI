@@ -2,6 +2,7 @@
 
 #include <map>
 #include <algorithm>
+#include <string>
 
 #include "AStar.h"
 #include "Globals.h"
@@ -213,8 +214,30 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		calculerScoreExploration(); // à voir
 		attribuerObjectifs(mapExplorationDistances);
 
+		BOT_LOGIC_LOG(mLogger, "Score exploration :", true);
 		for(NPC& npc : listeNPC)
 		{
+			std::string log = "  NPC ";
+			log += std::to_string(npc.getId());
+			log += " : q=";
+			log += std::to_string(npc.getEmplacement()->point.q);
+			log += ", r=";
+			log += std::to_string(npc.getEmplacement()->point.r);
+			log += "\n";
+			for(const SNoeudDistance &distance : mapExplorationDistances.at(&npc))
+			{
+				log += "    q=";
+				log += std::to_string(distance.pnoeud->point.q);
+				log += ", r=";
+				log += std::to_string(distance.pnoeud->point.r);
+				log += " => score=";
+				log += std::to_string(distance.distancedepart);
+				if (distance.pnoeud == npc.getObjectif())
+					log += " (OBJECTIF)";
+				log += "\n";
+			}
+			BOT_LOGIC_LOG(mLogger, log, false);
+
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
 			if(!chemin.empty())
 			{
