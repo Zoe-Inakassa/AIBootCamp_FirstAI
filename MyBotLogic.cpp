@@ -151,6 +151,10 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 			int scoreExplorationEntier = 1000 * scoreExploration; // TODO pas bien
 			distances.push_back({ noeud.noeud, scoreExplorationEntier });
 		}
+		std::sort(distances.begin(), distances.end(),
+			[](const SNoeudDistance &noeudA, const SNoeudDistance &noeudB) {
+				return noeudA.distancedepart < noeudB.distancedepart;
+			});
 		mapExplorationDistances[&npc] = distances;
 	}
 }
