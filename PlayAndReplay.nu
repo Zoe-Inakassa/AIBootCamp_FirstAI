@@ -129,8 +129,10 @@ alias ReplayLast = OpenLastReplay
 # Compiler, lancer la simulation et ouvrir le résultat
 def PlayAndReplay [mapname: string@MapNames] {
     Build
-    if (Play $mapname) {
-        print (LastReplay)
+    Play $mapname
+    let $lastReplay = (LastReplay)
+    print $lastReplay
+    if ($lastReplay != null) {
         OpenLastReplay
     }
 }
