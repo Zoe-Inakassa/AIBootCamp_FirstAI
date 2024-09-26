@@ -170,10 +170,15 @@ void Board::calculerDistancesGoalsUnNoeud(Noeud& noeud)
     if (noeud.getNbVoisinsUnknown() > 0) {
         // Trouver la distance à vol d'oiseau avec le goal le plus proche
         int distanceGoalPlusProche = INT_MAX;
-        for (Noeud *goal : goals) {
-            int distance = goal->point.calculerDistance(noeud.point);
-            if (distance < distanceGoalPlusProche) {
-                distanceGoalPlusProche = distance;
+        if (goals.empty()) {
+            // Le goal est peut être à côté
+            distanceGoalPlusProche = 1;
+        } else {
+            for (Noeud *goal : goals) {
+                int distance = goal->point.calculerDistance(noeud.point);
+                if (distance < distanceGoalPlusProche) {
+                    distanceGoalPlusProche = distance;
+                }
             }
         }
         noeud.setDistanceVolGoal(distanceGoalPlusProche);
