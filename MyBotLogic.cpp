@@ -12,7 +12,7 @@
 #include "NPC.h"
 #include "TurnData.h"
 
-MyBotLogic::MyBotLogic(): etatBot{EtatBot::Init}
+MyBotLogic::MyBotLogic(): etatBot{EtatBot::Init}, maxTurnNumber(0)
 {
 	//Write Code Here
 }
@@ -111,10 +111,9 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 	}
 }
 
-void MyBotLogic::calculerScoreExploration()
+void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 {
 	scoresExploration.clear();
-	int nbToursRestants = INT_MAX; // idée?
 
 	for (auto& noeud : board.getNoeuds()) {
 		// S'il y a un intérêt à explorer
@@ -158,6 +157,7 @@ void MyBotLogic::calculerScoreExploration()
 
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
+	int nbToursRestants = maxTurnNumber - _turnData.turnNb+1;
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
 	if(etatBot == EtatBot::Init)
 	{
@@ -168,7 +168,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		for(NPC& npc : listeNPC)
 		{
 			// Appliquer dijkstra et vérifier si au moins un objectif est trouvable dans le nombre de tours impartis
-			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), maxTurnNumber - _turnData.turnNb+1);
+			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), nbToursRestants);
 			if(!distances.empty())
 			{
 				mapDistances[&npc] = distances;

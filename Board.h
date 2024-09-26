@@ -42,7 +42,8 @@ public:
         return goals;
     }
 
-    void calculerDistanceExplorationGoal();
+    void calculerDistancesGoalsTousNoeuds();
+    void calculerDistancesGoalsUnNoeud(Noeud& noeud);
 };
 
 #endif // BOARD_H

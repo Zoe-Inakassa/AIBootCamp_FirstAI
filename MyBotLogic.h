@@ -40,7 +40,7 @@ public:
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
 	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 	void setEtatBot(const EtatBot&);
-	void calculerScoreExploration();
+	void calculerScoreExploration(int nbToursRestants);
 
 protected:
 	Logger mLogger;
