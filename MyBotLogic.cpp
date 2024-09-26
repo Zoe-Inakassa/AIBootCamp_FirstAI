@@ -194,47 +194,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	{
 		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Moving", true);
 		
-		for(NPC& npc : listeNPC)
-		{
-			if(npc.getState() == NPCState::MOVING)
-			{
-				// Vérifier s'il y a conflit et ajouter le mouvement dans mouvements
-				auto noeudSuivant = npc.getNextTileOnPath();
-				if(mouvements.count(noeudSuivant))
-				{
-					auto npcSurLeNoeud = mouvements[noeudSuivant];
-					if(npcSurLeNoeud->tailleChemin() >= npc.tailleChemin())
-					{
-						// npc ne peut pas bouger
-						// npcSurLeNoeud reste sur la tuile
-						mouvements[npc.getEmplacement()] = &npc;
-						if(mouvements.count(npc.getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
-					}else
-					{
-						// npc se déplace sur la tuile
-						// npcDejaSurlaTile reste à sa position
-						mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
-						if(mouvements.count(npcSurLeNoeud->getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
-						mouvements[noeudSuivant] = &npc;
-					}
-				}else
-				{
-					// Le noeud est libre, le NPC se déplace
-					mouvements[noeudSuivant] = &npc;
-				}
-			}
-			else
-			{
-				// Le pion reste sur place car il a finit
-				// il a en théorie toujours la priorité car aucun npc n'est censé passer sur sa tuile
-				// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
-				if(mouvements.count(npc.getEmplacement()))
-				{
-					BOT_LOGIC_LOG(mLogger, "Erreur: Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
-				}
-				mouvements[npc.getEmplacement()] = &npc;
-			}
-		}
+		mouvements = solveurMouvements(NPCState::MOVING);
 	}
 
 	
@@ -249,7 +209,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		calculerScoreExploration(); // à voir
 		attribuerObjectifs(mapExplorationDistances);
 
-		for (NPC& npc : listeNPC)
+		for(NPC& npc : listeNPC)
 		{
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
 			if(!chemin.empty())
@@ -257,47 +217,8 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 				npc.setChemin(chemin);
 				npc.setState(NPCState::EXPLORATION);
 			}
-			if (npc.getState() == NPCState::EXPLORATION)
-			{
-				// Vérifier s'il y a conflit et ajouter le mouvement dans mouvements
-				auto noeudSuivant = npc.getNextTileOnPath();
-				if (noeudSuivant != nullptr && mouvements.count(noeudSuivant))
-				{
-					auto npcSurLeNoeud = mouvements[noeudSuivant];
-					if (npcSurLeNoeud->tailleChemin() >= npc.tailleChemin())
-					{
-						// npc ne peut pas bouger
-						// npcSurLeNoeud reste sur la tuile
-						mouvements[npc.getEmplacement()] = &npc;
-						if (mouvements.count(npc.getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
-					}
-					else
-					{
-						// npc se déplace sur la tuile
-						// npcDejaSurlaTile reste à sa position
-						mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
-						if (mouvements.count(npcSurLeNoeud->getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
-						mouvements[noeudSuivant] = &npc;
-					}
-				}
-				else if (noeudSuivant != nullptr)
-				{
-					// Le noeud est libre, le NPC se déplace
-					mouvements[noeudSuivant] = &npc;
-				}
-			}
-			else
-			{
-				// Le pion reste sur place car il a finit
-				// il a en théorie toujours la priorité car aucun npc n'est censé passer sur sa tuile
-				// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
-				if (mouvements.count(npc.getEmplacement()))
-				{
-					BOT_LOGIC_LOG(mLogger, "Erreur: Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
-				}
-				mouvements[npc.getEmplacement()] = &npc;
-			}
 		}
+		mouvements = solveurMouvements(NPCState::EXPLORATION);
 	}
 
 	BOT_LOGIC_LOG(mLogger, "Deplacer les NPC", true);
@@ -305,4 +226,58 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	{
 		_orders.push_back(mouvement.second->deplacer(mouvement.first));
 	}
+}
+
+std::map<const Noeud*, NPC*> MyBotLogic::solveurMouvements(NPCState npcStateFilter)
+{
+	std::map<const Noeud*, NPC*> mouvements;
+	
+	for(NPC& npc : listeNPC)
+	{
+		const Noeud *noeudSuivant = nullptr;
+		if(npc.getState() == npcStateFilter)
+			noeudSuivant = npc.getNextTileOnPath();
+
+		if(noeudSuivant != nullptr)
+		{
+			// Vérifier s'il y a conflit et ajouter le mouvement dans mouvements
+			if(mouvements.count(noeudSuivant))
+			{
+				auto npcSurLeNoeud = mouvements[noeudSuivant];
+				if(npcSurLeNoeud->tailleChemin() >= npc.tailleChemin())
+				{
+					// npc ne peut pas bouger
+					// npcSurLeNoeud reste sur la tuile
+					if(mouvements.count(npc.getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+					mouvements[npc.getEmplacement()] = &npc;
+				}
+				else
+				{
+					// npc se déplace sur la tuile
+					// npcDejaSurlaTile reste à sa position
+					if(mouvements.count(npcSurLeNoeud->getEmplacement())) BOT_LOGIC_LOG(mLogger, "Erreur: NPC ne peut pas avancer ni rester sur la case", true);
+					mouvements[npcSurLeNoeud->getEmplacement()] = npcSurLeNoeud;
+					mouvements[noeudSuivant] = &npc;
+				}
+			}
+			else
+			{
+				// Le noeud est libre, le NPC se déplace
+				mouvements[noeudSuivant] = &npc;
+			}
+		}
+		else
+		{
+			// Le pion reste sur place car il a finit
+			// il a en théorie toujours la priorité car aucun npc n'est censé passer sur sa tuile
+			// Ajouter son "mouvement" dans map pour qu'aucun pion ne vienne sur sa case alors qu'il y est déjà
+			if(mouvements.count(npc.getEmplacement()))
+			{
+				BOT_LOGIC_LOG(mLogger, "Erreur: Quelqu'un veut aller sur la case d'un npc ayant terminé!!!", true);
+			}
+			mouvements[npc.getEmplacement()] = &npc;
+		}
+	}
+
+	return mouvements;
 }

@@ -16,7 +16,7 @@ SOrder NPC::deplacer(const Noeud *noeudVoisin)
     {
         chemin.pop_back();
         if(chemin.empty() && state == NPCState::MOVING) state=NPCState::FINISH;
-        if(chemin.empty() && state == NPCState::EXPLORATION) state = NPCState::FINISH;
+        if(chemin.empty() && state == NPCState::EXPLORATION) state = NPCState::EXPLORATION_PAUSE;
     }
     
     return SOrder{

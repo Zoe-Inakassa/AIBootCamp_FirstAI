@@ -41,6 +41,7 @@ public:
 	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 	void setEtatBot(const EtatBot&);
 	void calculerScoreExploration(int nbToursRestants);
+	std::map<const Noeud*, NPC*> solveurMouvements(NPCState npcStateFilter);
 
 protected:
 	Logger mLogger;
