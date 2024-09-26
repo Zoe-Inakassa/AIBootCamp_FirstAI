@@ -107,9 +107,14 @@ def Debug [mapname: string@MapNames] {
 def LastReplay [] {
     let $replayfolder: string = (ls Replays | where type == dir | sort-by modified | last | get name)
     let $replayfile: string = (ls $replayfolder | where name =~ .replay | sort-by modified | last | get name)
+    let $logfile: string = (ls $replayfolder | where name =~ .log | sort-by modified | last | get name)
     try {
         let content: table = (open $replayfile | from json)
-        return {replayfile:$replayfile content:$content}
+        return {
+            replayfile:$replayfile
+            content:$content
+            logfile:$logfile
+        }
     } catch {
         print "Le fichier de replay est invalide. Le programme a planté ?"
         return null
