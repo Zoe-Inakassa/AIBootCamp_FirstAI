@@ -269,17 +269,19 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			log += ", r=";
 			log += std::to_string(npc.getEmplacement()->point.r);
 			log += "\n";
-			for(const SNoeudDistance &distance : mapExplorationDistances.at(&npc))
-			{
-				log += "    q=";
-				log += std::to_string(distance.pnoeud->point.q);
-				log += ", r=";
-				log += std::to_string(distance.pnoeud->point.r);
-				log += " => score=";
-				log += std::to_string(distance.distancedepart);
-				if (distance.pnoeud == npc.getObjectif())
-					log += " (OBJECTIF)";
-				log += "\n";
+			if (mapExplorationDistances.count(&npc)) {
+				for (const SNoeudDistance &distance : mapExplorationDistances.at(&npc))
+				{
+					log += "    q=";
+					log += std::to_string(distance.pnoeud->point.q);
+					log += ", r=";
+					log += std::to_string(distance.pnoeud->point.r);
+					log += " => score=";
+					log += std::to_string(distance.distancedepart);
+					if (distance.pnoeud == npc.getObjectif())
+						log += " (OBJECTIF)";
+					log += "\n";
+				}
 			}
 			BOT_LOGIC_LOG(mLogger, log, false);
 
