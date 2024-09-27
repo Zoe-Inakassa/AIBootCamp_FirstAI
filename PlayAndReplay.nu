@@ -99,7 +99,7 @@ def PlayAll [] {
 
 # Lancer en mode Debug (attendre 8 secondes)
 def Debug [mapname: string@MapNames] {
-    Play $mapname 8 -1 600_000
+    Play $mapname 8 600_000 600_000
 }
 
 # Obtenir les informations du dernier replay
