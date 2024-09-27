@@ -70,24 +70,24 @@ std::pair<NPC*,NPC*> MyBotLogic::realisable(const std::map<NPC*, std::vector<SNo
 	return {nullptr,nullptr};
 }
 
-int MyBotLogic::calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution)
+float MyBotLogic::calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution)
 {
 	std::pair<NPC*,NPC*> npcs = realisable(mapDistances, solution);
 	if(npcs.first == nullptr) //realisable
 	{
-		int max = -1;
+		float max = -1;
 		for(auto npc : solution)
 		{
 			if(!mapDistances.at(npc.first).empty())
 			{
-				int valeur = mapDistances.at(npc.first)[npc.second].distancedepart;
+				float valeur = mapDistances.at(npc.first)[npc.second].score;
 				if(valeur>max) max = valeur;
 			}
 		}
 		return max;
 	}
-	int value1 = -1;
-	int value2 = -1;
+	float value1 = -1;
+	float value2 = -1;
 	
 	//Relancer sur le premier conflit
 	std::map<NPC*,int> copiesolution1;
@@ -107,7 +107,7 @@ int MyBotLogic::calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance
 		value2 = calculerSolution(mapDistances, copiesolution2);
 	}
 
-	
+	// Retourne la solution avec le score le plus faible et qui fonctionne (qui n'est pas NaN)
 	if(value1 == -1)
 	{
 		solution = copiesolution2;
@@ -132,7 +132,7 @@ void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 		solution[npc.first] = 0;
 	}
 
-	int retour = calculerSolution(mapDistances, solution);
+	float retour = calculerSolution(mapDistances, solution);
 	if(retour == -1)
 	{
 		BOT_LOGIC_LOG(mLogger, "Aucune solution réalisable n'a été trouvée", true);
@@ -196,12 +196,11 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 		for (auto& noeud : noeudsAttaignables) {
 			int distance = pointNPC.calculerDistance(noeud.pnoeud->point);
 			float scoreExploration = noeud.pnoeud->getScoreExploration(distance);
-			int scoreExplorationEntier = 1000 * scoreExploration; // TODO pas bien
-			noeud.distancedepart = scoreExplorationEntier;
+			noeud.score = scoreExploration;
 		}
 		std::sort(noeudsAttaignables.begin(), noeudsAttaignables.end(),
 			[](const SNoeudDistance &noeudA, const SNoeudDistance &noeudB) {
-				return noeudA.distancedepart < noeudB.distancedepart;
+				return noeudA.score < noeudB.score;
 			});
 
 		if (!noeudsAttaignables.empty()) {
@@ -299,7 +298,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 					log += ", r=";
 					log += std::to_string(distance.pnoeud->point.r);
 					log += " => score=";
-					log += std::to_string(distance.distancedepart);
+					log += std::to_string(distance.score);
 					if (distance.pnoeud == npc.getObjectif())
 						log += " (OBJECTIF)";
 					log += "\n";

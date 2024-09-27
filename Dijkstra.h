@@ -7,7 +7,7 @@
 
 struct SNoeudDistance {
     const Noeud* pnoeud;
-    int distancedepart;
+    float score;
 };
 
 class Dijkstra{

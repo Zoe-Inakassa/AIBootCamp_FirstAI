@@ -40,7 +40,7 @@ public:
 	virtual bool CalculerCheminsGoals(int nbToursRestants);
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
 	std::pair<NPC*,NPC*> realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution) const;
-	int calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution);
+	float calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution);
 	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 	void setEtatBot(const EtatBot&);
 	void calculerScoreExploration(int nbToursRestants);
