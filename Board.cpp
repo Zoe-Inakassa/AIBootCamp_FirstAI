@@ -11,7 +11,6 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les tiles pour les trouver rapidement
     for (auto* pTile = _initData.tileInfoArray; pTile != _initData.tileInfoArray + _initData.tileInfoArraySize; ++pTile) {
-        if(pTile->type == EHexCellType::Goal) goalDecouvert = true;
         addTile(*pTile);
     }
 
@@ -50,7 +49,6 @@ void Board::updateBoard(const STurnData &_turnData)
     for(int i=0; i!=_turnData.tileInfoArraySize; i++)
 	{
 		STileInfo tuile = _turnData.tileInfoArray[i];
-        if(tuile.type == EHexCellType::Goal) goalDecouvert = true;
 		addTile(tuile);
         int hash = Point::calculerHash(tuile.q,tuile.r);
         calculerDistancesGoalsUnNoeud(mapnoeuds.at(hash));
