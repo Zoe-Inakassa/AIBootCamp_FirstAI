@@ -144,7 +144,14 @@ void Board::addTile(const STileInfo& tuile)
 
     Noeud *noeud = getNoeud(hash);
     if (noeud->getTiletype() != TileType::Unknown) {
+        // Créer des voisins fictifs qui peuvent être en dehors de la carte
         for (Point pointVoisin : point.surroundingPoints()) {
+            if (pointVoisin.q < 0 || pointVoisin.q + 2 * pointVoisin.r < 0) {
+                // Ce voisin ne peut pas exister
+                // Il n'y a pas de point plus à gauche et plus à droite que 0,0
+                continue;
+            }
+
             int hashVoisin = pointVoisin.calculerHash();
             if (!mapnoeuds.count(hashVoisin)) {
                 mapnoeuds.insert(std::pair<int, Noeud>(hashVoisin, Noeud{ pointVoisin, TileType::Unknown }));
