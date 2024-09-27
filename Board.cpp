@@ -154,7 +154,7 @@ void Board::addTile(const STileInfo& tuile)
             int hashVoisin = pointVoisin.calculerHash();
             if (!mapnoeuds.count(hashVoisin)) {
                 mapnoeuds.insert(std::pair<int, Noeud>(hashVoisin, Noeud{ pointVoisin, TileType::Unknown }));
-                Noeud *noeudVoisin = getNoeud(hash);
+                Noeud *noeudVoisin = getNoeud(hashVoisin);
                 noeudVoisin->addNeighbour(noeud);
                 noeud->addNeighbour(noeudVoisin);
             }
