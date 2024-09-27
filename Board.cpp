@@ -278,7 +278,7 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
         // Retirer les noeuds en dehors des bordures
         for (auto &noeud : mapnoeuds) {
             if (!pointEstPossible(noeud.second->point)) {
-                if (noeud.second->getTiletype() == TileType::Unknown) {
+                if (noeud.second->getTiletype() == TileType::Unknown || noeud.second->getTiletype() == TileType::Forbidden) {
                     noeud.second->setTiletype(TileType::Forbidden);
                 } else {
                     throw ExceptionNoeudConnuEnDehors{};
