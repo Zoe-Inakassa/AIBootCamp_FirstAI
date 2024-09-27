@@ -203,9 +203,10 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 				return noeudA.score < noeudB.score;
 			});
 
-		if (!noeudsAttaignables.empty()) {
-			mapExplorationDistances[&npc] = noeudsAttaignables;
-		}
+		// Ajouter l'emplacement actuel du NPC, pour lui permettre de rester sur place en dernier recours
+		noeudsAttaignables.push_back({ npc.getEmplacement(), INFINITY });
+
+		mapExplorationDistances[&npc] = noeudsAttaignables;
 	}
 }
 
