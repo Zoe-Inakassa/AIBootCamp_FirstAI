@@ -8,7 +8,7 @@
 
 class Board{
     std::map<int, Noeud> mapnoeuds;
-    std::vector<Noeud*> goals;
+    std::set<Noeud*> goals;
     std::map<int, Mur> mapobjets;
     bool goalDecouvert;
     
@@ -37,7 +37,7 @@ public:
         return &mapnoeuds.at(id);
     }
     
-    const std::vector<Noeud*> &getGoals()
+    const std::set<Noeud*> &getGoals()
     {
         return goals;
     }

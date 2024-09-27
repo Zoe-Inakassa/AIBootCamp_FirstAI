@@ -136,11 +136,12 @@ void Board::addTile(const STileInfo& tuile)
         mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, tiletype)));
     }
 
+    Noeud *noeud = getNoeud(hash);
     if (tiletype == TileType::Goal) {
         goalDecouvert = true;
+        goals.insert(noeud);
     }
 
-    Noeud *noeud = getNoeud(hash);
     if (noeud->getTiletype() != TileType::Unknown) {
         // Créer des voisins fictifs qui peuvent être en dehors de la carte
         for (Point pointVoisin : point.surroundingPoints()) {
