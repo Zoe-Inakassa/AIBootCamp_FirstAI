@@ -46,7 +46,6 @@ void Noeud::setTiletype(TileType type)
         return;
     if (this->tiletype != TileType::Unknown)
         throw ExceptionChangementTileTypeInvalide{};
-    this->tiletype = type;
     // Mettre à jour les voisins
     switch (type) {
         case TileType::Default:
@@ -68,11 +67,14 @@ void Noeud::setTiletype(TileType type)
             // Unknown ne peut pas arriver
             throw ExceptionChangementTileTypeInvalide{};
     }
+    this->tiletype = type;
 }
 
 void Noeud::addNeighbour(Noeud* neighbour)
 {
     if (neighbours.count(neighbour))
+        return;
+    if (neighbour->getTiletype() == TileType::Forbidden)
         return;
     for (auto mur : murs) {
         // Vérifier les murs
