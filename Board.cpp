@@ -1,6 +1,6 @@
 ﻿#include "Board.h"
 
-Board::Board(): mapnoeuds{}, goals{}
+Board::Board(): mapnoeuds{}, goals{}, nombreTileMaxDroite{INT_MAX}, nombreTileMaxBas{INT_MAX}
 {
     
 }
@@ -43,7 +43,7 @@ void Board::initBoard(const SInitData& _initData)
     }
 }
 
-void Board::updateBoard(const STurnData &_turnData)
+void Board::updateBoard(const STurnData &_turnData, const std::vector<NPC> &listeNPC)
 {
     goalDecouvert = false;
     for(int i=0; i!=_turnData.tileInfoArraySize; i++)
@@ -65,6 +65,8 @@ void Board::updateBoard(const STurnData &_turnData)
 			addMur(object);
 		}
 	}
+
+    calculerBordures(listeNPC);
 
     if (goalDecouvert) {
         calculerDistancesGoalsTousNoeuds();
@@ -145,9 +147,8 @@ void Board::addTile(const STileInfo& tuile)
     if (noeud->getTiletype() != TileType::Unknown) {
         // Créer des voisins fictifs qui peuvent être en dehors de la carte
         for (Point pointVoisin : point.surroundingPoints()) {
-            if (pointVoisin.q < 0 || pointVoisin.q + 2 * pointVoisin.r < 0) {
+            if (!pointEstPossible(pointVoisin)) {
                 // Ce voisin ne peut pas exister
-                // Il n'y a pas de point plus à gauche et plus à droite que 0,0
                 continue;
             }
 
@@ -160,6 +161,22 @@ void Board::addTile(const STileInfo& tuile)
             }
         }
     }
+}
+
+bool Board::pointEstPossible(Point point)
+{
+    int x = point.q + 2 * point.r;
+    // y = point.q
+    if (point.q < 0 || nombreTileMaxBas < point.q) {
+        // Le point est plus haut que 0,0 ou plus bas que le noeud le plus bas autorisé
+        return false;
+    }
+    if (x < 0 || nombreTileMaxDroite < x) {
+        // Le point est à gauche de 0,0 ou plus à droite que le noeud le plus à droite autorisé
+        return false;
+    }
+    // Le point existe peut-être, d'aprés les informations actuelles.
+    return true;
 }
 
 void Board::calculerDistancesGoalsTousNoeuds()
@@ -188,5 +205,69 @@ void Board::calculerDistancesGoalsUnNoeud(Noeud& noeud)
             }
         }
         noeud.setDistanceVolGoal(distanceGoalPlusProche);
+    }
+}
+
+void Board::calculerBordures(const std::vector<NPC> &listeNPC)
+{
+    // Si un NPC pourrait voir une tile mais que celle-ci n'existe pas ou est UNKNOWN
+    // Alors, nous sommes à la bordure
+    // La bordure gauche et haute sont définies par 0,0
+    bool bordureChangee = false;
+
+    // Trouver la bordure droite
+    if (nombreTileMaxDroite == INT_MAX) {
+        for (const NPC &npc : listeNPC) {
+            const Noeud *emplacement = npc.getEmplacement();
+            // TODO: on suppose pour l'instant une vision de 1
+
+            // S'il n'y a pas de mur pour bloquer la vue
+            if (!emplacement->hasMur(EHexCellDirection::E)) {
+                const Noeud *noeudE = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::E).calculerHash());
+                // Les noeuds voisins existent forcément, sauf cas de bordure
+                if (noeudE == nullptr || noeudE->getTiletype() == TileType::Unknown) {
+                    int xMax = emplacement->point.q + 2 * emplacement->point.r;
+                    if (emplacement->point.q % 2 == 0) {
+                        // Cas d'un q pair : xMax est 1 plus à droite sur les lignes impaires
+                        ++xMax;
+                    }
+                    nombreTileMaxDroite = xMax;
+                    bordureChangee = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Trouver la bordure basse
+    if (nombreTileMaxBas == INT_MAX) {
+        for (const NPC &npc : listeNPC) {
+            const Noeud *emplacement = npc.getEmplacement();
+            // TODO: on suppose pour l'instant une vision de 1
+
+            // S'il n'y a pas de mur pour bloquer la vue
+            if (!emplacement->hasMur(EHexCellDirection::SW)) {
+                const Noeud *noeudSW = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::SW).calculerHash());
+                // Les noeuds voisins existent forcément, sauf cas de bordure
+                if (noeudSW == nullptr || noeudSW->getTiletype() == TileType::Unknown) {
+                    nombreTileMaxBas = emplacement->point.q;
+                    bordureChangee = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (bordureChangee) {
+        // Retirer les noeuds en dehors des bordures
+        for (auto noeud : mapnoeuds) {
+            if (!pointEstPossible(noeud.second.point)) {
+                if (noeud.second.getTiletype() == TileType::Unknown) {
+                    noeud.second.setTiletype(TileType::Forbidden);
+                } else {
+                    throw ExceptionNoeudConnuEnDehors{};
+                }
+            }
+        }
     }
 }

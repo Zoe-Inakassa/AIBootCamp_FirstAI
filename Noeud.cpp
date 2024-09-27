@@ -103,6 +103,16 @@ void Noeud::addMur(const Mur* mur)
     removeNeighbour(oppose);
 }
 
+bool Noeud::hasMur(EHexCellDirection cellDirection) const
+{
+    for (auto mur : murs) {
+        if (getDirection(*mur->getNoeudOppose(this)) == cellDirection) {
+            return true;
+        }
+    }
+    return false;
+}
+
 EHexCellDirection Noeud::getDirection(const Noeud& other) const
 {
     int deltaQ = other.point.q - point.q;

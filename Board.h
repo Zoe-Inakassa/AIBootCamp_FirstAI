@@ -5,17 +5,22 @@
 #include "InitData.h"
 #include "TurnData.h"
 #include "Noeud.h"
+#include "NPC.h"
+
+class ExceptionNoeudConnuEnDehors{};
 
 class Board{
     std::map<int, Noeud> mapnoeuds;
     std::set<Noeud*> goals;
     std::map<int, Mur> mapobjets;
     bool goalDecouvert;
+    int nombreTileMaxDroite;
+    int nombreTileMaxBas;
     
 public:
     Board();
     void initBoard(const SInitData &_initData);
-    void updateBoard(const STurnData &_turnData);
+    void updateBoard(const STurnData &_turnData, const std::vector<NPC> &listeNPC);
     void addMur(const SObjectInfo& objet);
 
     bool existMur(int id)
@@ -29,6 +34,8 @@ public:
     {
         return mapnoeuds.find(id) != mapnoeuds.end();
     }
+
+    bool pointEstPossible(Point point);
     
     const std::map<int, Noeud> &getNoeuds() { return mapnoeuds; }
 
@@ -42,8 +49,10 @@ public:
         return goals;
     }
 
+private:
     void calculerDistancesGoalsTousNoeuds();
     void calculerDistancesGoalsUnNoeud(Noeud& noeud);
+    void calculerBordures(const std::vector<NPC> &listeNPC);
 };
 
 #endif // BOARD_H

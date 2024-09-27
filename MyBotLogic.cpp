@@ -253,7 +253,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Exploration", true);
 
 		//Mettre à jour la vision
-		board.updateBoard(_turnData);
+		board.updateBoard(_turnData, listeNPC);
 
 		// S'il y a assez de goal
 		if (board.getGoals().size() >= listeNPC.size()) {
