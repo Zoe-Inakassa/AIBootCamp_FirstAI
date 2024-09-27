@@ -153,7 +153,7 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 	{
 		for(NPC& npc : listeNPC)
 		{
-			npc.setState(NPCState::EXPLORATION);
+			npc.setState(NPCState::EXPLORATION_PAUSE);
 		}
 	}
 	if(etat == EtatBot::Moving)
@@ -180,6 +180,11 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 	// TODO : ne pas oublier d'éloigner les NPC pour maximiser l'exploration
 	mapExplorationDistances.clear();
 	for (NPC &npc : listeNPC) {
+		if (npc.getState() == NPCState::EXPLORATION && npc.getObjectif()->getNbVoisinsUnknown() > 0) {
+			// Le NPC se dirige vers une case pouvant être explorée, pas besoin de recalculer
+			continue;
+		}
+
 		const Point &pointNPC = npc.getEmplacement()->point;
 
 		// Obtenir les noeuds attaignables
@@ -205,6 +210,29 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 	}
 }
 
+bool MyBotLogic::CalculerCheminsGoals(int nbToursRestants)
+{
+	std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
+	for(NPC& npc : listeNPC)
+	{
+		// Appliquer dijkstra et vérifier si au moins un objectif est trouvable dans le nombre de tours impartis
+		std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), nbToursRestants);
+		if(!distances.empty())
+		{
+			mapDistances[&npc] = distances;
+		}else
+		{
+			BOT_LOGIC_LOG(mLogger, "Un tableau de distances est vide", true);
+			return false;
+		}
+	}
+	
+	// Attribuer les objectifs
+	attribuerObjectifs(mapDistances);
+	// pas d'erreur
+	return true;
+}
+
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
 	int nbToursRestants = maxTurnNumber - _turnData.turnNb+1;
@@ -212,48 +240,42 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	if(etatBot == EtatBot::Init)
 	{
 		BOT_LOGIC_LOG(mLogger, "1ère boucle: état Init", true);
-		
-		std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
-		bool erreur = false;
-		for(NPC& npc : listeNPC)
-		{
-			// Appliquer dijkstra et vérifier si au moins un objectif est trouvable dans le nombre de tours impartis
-			std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), nbToursRestants);
-			if(!distances.empty())
-			{
-				mapDistances[&npc] = distances;
-			}else
-			{
-				erreur = true;
-				BOT_LOGIC_LOG(mLogger, "Un tableau de distances est vide", true);
-			}
-		}
-		
-		// Attribuer les objectifs
-		if(!erreur)
-		{
-			attribuerObjectifs(mapDistances);
+		if (CalculerCheminsGoals(nbToursRestants)) {
+			// Les objectifs sont attribués
 			setEtatBot(EtatBot::Moving);
-		}else { setEtatBot(EtatBot::Exploration);
+		} else {
+			setEtatBot(EtatBot::Exploration);
 		}
 	}
-	
+
+	if (etatBot == EtatBot::Exploration)
+	{
+		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Exploration", true);
+
+		//Mettre à jour la vision
+		board.updateBoard(_turnData);
+
+		// S'il y a assez de goal
+		if (board.getGoals().size() >= listeNPC.size()) {
+			if (CalculerCheminsGoals(nbToursRestants)) {
+				// Les objectifs sont attribués
+				setEtatBot(EtatBot::Moving);
+			}
+			// Sinon, un NPC n'a pas de goal accessible, continuer d'explorer
+		}
+	}
 
 	std::map<const Noeud*, NPC*> mouvements;
 	if(etatBot == EtatBot::Moving)
 	{
-		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Moving", true);
+		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Moving", true);
 		
 		mouvements = solveurMouvements(NPCState::MOVING);
 	}
 
-	
-	if(etatBot == EtatBot::Exploration)
+	if (etatBot == EtatBot::Exploration)
 	{
-		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Exploration", true);
-		
-		//Mettre à jour la vision
-		board.updateBoard(_turnData);
+		BOT_LOGIC_LOG(mLogger, "4ème boucle: état Exploration", true);
 		
 		// TODO :Décider du prochain mouvement des npcs
 		calculerScoreExploration(nbToursRestants); // à voir

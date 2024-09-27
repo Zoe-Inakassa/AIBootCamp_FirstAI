@@ -37,6 +37,7 @@ public:
 
 	virtual void Configure(const SConfigData& _configData);
 	virtual void Init(const SInitData& _initData);
+	virtual bool CalculerCheminsGoals(int nbToursRestants);
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
 	std::pair<NPC*,NPC*> realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution) const;
 	int calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution);
