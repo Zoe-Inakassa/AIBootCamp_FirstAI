@@ -198,7 +198,10 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 			[](const SNoeudDistance &noeudA, const SNoeudDistance &noeudB) {
 				return noeudA.distancedepart < noeudB.distancedepart;
 			});
-		mapExplorationDistances[&npc] = noeudsAttaignables;
+
+		if (!noeudsAttaignables.empty()) {
+			mapExplorationDistances[&npc] = noeudsAttaignables;
+		}
 	}
 }
 
