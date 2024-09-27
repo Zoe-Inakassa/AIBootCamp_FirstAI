@@ -49,7 +49,6 @@ protected:
 	Logger mLogger;
 	Board board;
 	std::vector<NPC> listeNPC;
-	std::vector<SScoreExploration> scoresExploration;
 	std::map<NPC*, std::vector<SNoeudDistance>> mapExplorationDistances;
 	int maxTurnNumber;
 	EtatBot etatBot;

@@ -176,49 +176,29 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 
 void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 {
-	scoresExploration.clear();
-
-	for (auto& noeud : board.getNoeuds()) {
-		// S'il y a un intérêt à explorer
-		if (noeud.second.getNbVoisinsUnknown() > 0 && noeud.second.getTiletype() != TileType::Unknown) {
-			// Trouver la distance à vol d'oiseau avec le NPC le plus proche
-			int distanceNPCPlusProche = INT_MAX;
-			for (const NPC &npc : listeNPC) {
-				int distance = npc.getEmplacement()->point.calculerDistance(noeud.second.point);
-				if (distance < distanceNPCPlusProche) {
-					distanceNPCPlusProche = distance;
-				}
-			}
-			int distanceMinimum = distanceNPCPlusProche + noeud.second.getDistanceVolGoal();
-			if (distanceMinimum <= nbToursRestants) {
-				scoresExploration.push_back({
-					&noeud.second,
-					distanceNPCPlusProche,
-					noeud.second.getScoreExploration(distanceNPCPlusProche),
-				});
-				// Problème pouvant arriver : un npc est proche de 2 tuiles à explorer,
-				// Sans considérer que l'autre NPC est très loin
-			}
-		}
-	}
-
 	// Sélectionner les tuiles à explorer selon le score
 	// TODO : ne pas oublier d'éloigner les NPC pour maximiser l'exploration
 	mapExplorationDistances.clear();
 	for (NPC &npc : listeNPC) {
-		std::vector<SNoeudDistance> distances;
 		const Point &pointNPC = npc.getEmplacement()->point;
-		for (auto& noeud : scoresExploration) {
-			int distance = pointNPC.calculerDistance(noeud.noeud->point);
-			float scoreExploration = noeud.noeud->getScoreExploration(distance);
+
+		// Obtenir les noeuds attaignables
+		std::vector<SNoeudDistance> noeudsAttaignables = Dijkstra::calculerDistances(
+			npc.getEmplacement(),
+			[](const Noeud *noeud) { return noeud->getNbVoisinsUnknown() > 0; });
+
+		// Modifier la valeur pour prendre en compte le score du noeud
+		for (auto& noeud : noeudsAttaignables) {
+			int distance = pointNPC.calculerDistance(noeud.pnoeud->point);
+			float scoreExploration = noeud.pnoeud->getScoreExploration(distance);
 			int scoreExplorationEntier = 1000 * scoreExploration; // TODO pas bien
-			distances.push_back({ noeud.noeud, scoreExplorationEntier });
+			noeud.distancedepart = scoreExplorationEntier;
 		}
-		std::sort(distances.begin(), distances.end(),
+		std::sort(noeudsAttaignables.begin(), noeudsAttaignables.end(),
 			[](const SNoeudDistance &noeudA, const SNoeudDistance &noeudB) {
 				return noeudA.distancedepart < noeudB.distancedepart;
 			});
-		mapExplorationDistances[&npc] = distances;
+		mapExplorationDistances[&npc] = noeudsAttaignables;
 	}
 }
 
