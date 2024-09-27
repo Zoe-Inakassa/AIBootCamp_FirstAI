@@ -5,6 +5,14 @@ Board::Board(): mapnoeuds{}, goals{}, nombreTileMaxDroite{INT_MAX}, nombreTileMa
     
 }
 
+Board::~Board()
+{
+    for (auto it : mapnoeuds) {
+        delete it.second;
+    }
+    mapnoeuds.clear();
+}
+
 void Board::initBoard(const SInitData& _initData)
 {
     goalDecouvert = false;
@@ -27,13 +35,13 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les voisins
     for (auto& noeud : mapnoeuds) {
-        std::vector<Point> points = noeud.second.point.surroundingPoints();
+        std::vector<Point> points = noeud.second->point.surroundingPoints();
         for (auto& point : points)
         {
             auto adresse = mapnoeuds.find(point.calculerHash());
             if(adresse !=mapnoeuds.end())
             {
-                noeud.second.addNeighbour(&(adresse->second));
+                noeud.second->addNeighbour(adresse->second);
             }
         }
     }
@@ -80,17 +88,25 @@ void Board::addMur(const SObjectInfo& objet)
     int hashMur = Mur::calculerHash(hashA, objet.cellPosition);
     if (!mapobjets.count(hashMur))
     {
-        if (!mapnoeuds.count(hashA)) {
-            mapnoeuds.insert(std::pair<int, Noeud>(hashA, Noeud(pointA, TileType::Unknown)));
+        // Obtenir ou créer le noeud
+        auto it = mapnoeuds.find(hashA);
+        Noeud *noeudA;
+        if (it == mapnoeuds.end()) {
+            noeudA = mapnoeuds[hashA] = new Noeud(pointA, TileType::Unknown);
+        } else {
+            noeudA = (*it).second;
         }
-            
-        Noeud *noeudA = &mapnoeuds.at(hashA);
+        
+        // Obtenir ou créer le noeud
         Point pointB = noeudA->getPointNeighbour(objet.cellPosition);
         int hashB = pointB.calculerHash();
-        if (!mapnoeuds.count(hashB)) {
-            mapnoeuds.insert(std::pair<int, Noeud>(hashB, Noeud(pointB, TileType::Unknown)));
+        it = mapnoeuds.find(hashB);
+        Noeud *noeudB;
+        if (it == mapnoeuds.end()) {
+            noeudB = mapnoeuds[hashB] = new Noeud(pointB, TileType::Unknown);
+        } else {
+            noeudB = (*it).second;
         }
-        Noeud *noeudB = &mapnoeuds.at(hashB);
 
         mapobjets[hashMur] = {
             noeudA,
@@ -135,7 +151,7 @@ void Board::addTile(const STileInfo& tuile)
         }
     }else
     {
-        mapnoeuds.insert(std::pair<int, Noeud>(hash, Noeud(point, tiletype)));
+        mapnoeuds[hash] = new Noeud(point, tiletype);
     }
 
     Noeud *noeud = getNoeud(hash);
@@ -154,7 +170,7 @@ void Board::addTile(const STileInfo& tuile)
 
             int hashVoisin = pointVoisin.calculerHash();
             if (!mapnoeuds.count(hashVoisin)) {
-                mapnoeuds.insert(std::pair<int, Noeud>(hashVoisin, Noeud{ pointVoisin, TileType::Unknown }));
+                mapnoeuds[hashVoisin] = new Noeud{ pointVoisin, TileType::Unknown };
                 Noeud *noeudVoisin = getNoeud(hashVoisin);
                 noeudVoisin->addNeighbour(noeud);
                 noeud->addNeighbour(noeudVoisin);
@@ -188,9 +204,9 @@ void Board::calculerDistancesGoalsTousNoeuds()
     }
 }
 
-void Board::calculerDistancesGoalsUnNoeud(Noeud& noeud)
+void Board::calculerDistancesGoalsUnNoeud(Noeud* noeud)
 {
-    if (noeud.getNbVoisinsUnknown() > 0) {
+    if (noeud->getNbVoisinsUnknown() > 0) {
         // Trouver la distance à vol d'oiseau avec le goal le plus proche
         int distanceGoalPlusProche = INT_MAX;
         if (goals.empty()) {
@@ -198,13 +214,13 @@ void Board::calculerDistancesGoalsUnNoeud(Noeud& noeud)
             distanceGoalPlusProche = 1;
         } else {
             for (Noeud *goal : goals) {
-                int distance = goal->point.calculerDistance(noeud.point);
+                int distance = goal->point.calculerDistance(noeud->point);
                 if (distance < distanceGoalPlusProche) {
                     distanceGoalPlusProche = distance;
                 }
             }
         }
-        noeud.setDistanceVolGoal(distanceGoalPlusProche);
+        noeud->setDistanceVolGoal(distanceGoalPlusProche);
     }
 }
 
@@ -261,9 +277,9 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
     if (bordureChangee) {
         // Retirer les noeuds en dehors des bordures
         for (auto &noeud : mapnoeuds) {
-            if (!pointEstPossible(noeud.second.point)) {
-                if (noeud.second.getTiletype() == TileType::Unknown) {
-                    noeud.second.setTiletype(TileType::Forbidden);
+            if (!pointEstPossible(noeud.second->point)) {
+                if (noeud.second->getTiletype() == TileType::Unknown) {
+                    noeud.second->setTiletype(TileType::Forbidden);
                 } else {
                     throw ExceptionNoeudConnuEnDehors{};
                 }

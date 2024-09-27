@@ -50,10 +50,11 @@ private:
     int heuristiqueDistanceVolGoal = 0;
 
 public:
-    // On delete le constructeur par défaut pour éviter les erreurs
+    // On delete le constructeur par défaut et de recopie pour éviter les erreurs
     Noeud() = delete;
+    Noeud(const Noeud& other) = delete;
+    Noeud &operator=(const Noeud& other) = delete;
     
-    Noeud(const Noeud& other) = default;
     Noeud(const STileInfo& info);
     Noeud(Point point, TileType type);
     ~Noeud() = default;
