@@ -138,9 +138,10 @@ void Board::addTile(const STileInfo& tuile)
     default:
         throw ExceptionCellTypeInconnu{};
     }
+    Noeud *noeud;
     if(existNoeud(hash))
     {
-        Noeud* noeud = getNoeud(hash);
+        noeud = getNoeud(hash);
         if(noeud->getTiletype() == TileType::Unknown)
         {
             noeud->setTiletype(tiletype);
@@ -151,16 +152,15 @@ void Board::addTile(const STileInfo& tuile)
         }
     }else
     {
-        mapnoeuds[hash] = new Noeud(point, tiletype);
+        noeud = mapnoeuds[hash] = new Noeud(point, tiletype);
     }
 
-    Noeud *noeud = getNoeud(hash);
     if (tiletype == TileType::Goal) {
         goalDecouvert = true;
         goals.insert(noeud);
     }
 
-    if (noeud->getTiletype() != TileType::Unknown) {
+    if (tiletype != TileType::Unknown) {
         // Créer des voisins fictifs qui peuvent être en dehors de la carte
         for (Point pointVoisin : point.surroundingPoints()) {
             if (!pointEstPossible(pointVoisin)) {
@@ -179,7 +179,7 @@ void Board::addTile(const STileInfo& tuile)
     }
 }
 
-bool Board::pointEstPossible(Point point)
+bool Board::pointEstPossible(Point point) const
 {
     int x = point.q + 2 * point.r;
     // y = point.q

@@ -36,7 +36,7 @@ public:
         return mapnoeuds.find(id) != mapnoeuds.end();
     }
 
-    bool pointEstPossible(Point point);
+    bool pointEstPossible(Point point) const;
     
     const std::map<int, Noeud*> &getNoeuds() { return mapnoeuds; }
 
