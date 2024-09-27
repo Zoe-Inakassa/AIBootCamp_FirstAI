@@ -88,7 +88,7 @@ def PlayAll [] {
             return {resultData: {hasWin: false, resultPayload: 'mapname invalide'}}
         }
         let $lastReplay = (LastReplay)
-        if $lastReplay == null { return {resultData: {hasWin: false, resultPayload: 'Exception'}} }
+        if $lastReplay.ok == false { return {resultData: {hasWin: false, resultPayload: 'Exception'}} }
         return $lastReplay.content
     }
     | insert hasWin { $in.result.resultData.hasWin }
@@ -114,17 +114,34 @@ def LastReplay [] {
             replayfile:$replayfile
             content:$content
             logfile:$logfile
+            ok:true
         }
     } catch {
         print "Le fichier de replay est invalide. Le programme a planté ?"
-        return null
+        return {
+            replayfile:$replayfile
+            content:null
+            logfile:$logfile
+            ok:false
+        }
     }
 }
 
+def FixReplay [$replayfile: string] {
+    $'](char newline)}' | save --append $replayfile
+}
+
 # Ouvrir la visu avec le dernier replay
-def OpenLastReplay [] {
+def OpenLastReplay [$tryfix = true] {
     let $lastReplay = (LastReplay)
-    if $lastReplay != null {
+    if $lastReplay.ok != true {
+        if $tryfix {
+            print $"Tentative de correction de ($lastReplay.replayfile)"
+            FixReplay $lastReplay.replayfile
+            return (OpenLastReplay false)
+        }
+        print $"Le fichier de replay est corrompu ($lastReplay.replayfile)"
+    } else {
         print $"Ouverture de ($lastReplay.replayfile)"
         start $lastReplay.replayfile
     }
@@ -137,7 +154,7 @@ def PlayAndReplay [mapname: string@MapNames] {
     Play $mapname
     let $lastReplay = (LastReplay)
     print $lastReplay
-    if ($lastReplay != null) {
+    if ($lastReplay.ok == true) {
         OpenLastReplay
     }
 }
