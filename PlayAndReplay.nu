@@ -62,7 +62,6 @@ def Play [
 
     if ($result.exit_code == 0) {
         print "Match Completed : Victory!"
-        return true
     } else {
         let exitMessages = {
             "-2": $"Invalid Map Name ($mapname)"
@@ -73,8 +72,8 @@ def Play [
             | get $"($result.exit_code)" --ignore-errors
             | default $"Erreur d'exécution: ($result.exit_code)")
         print $message
-        return false
-    }
+        }
+    return $result.exit_code
 }
 
 # Exécuter sur toutes les map, puis donner un compte rendu
@@ -151,7 +150,8 @@ alias ReplayLast = OpenLastReplay
 # Compiler, lancer la simulation et ouvrir le résultat
 def PlayAndReplay [mapname: string@MapNames] {
     Build
-    Play $mapname
+    let $exit_code = (Play $mapname)
+    if ($exit_code == -2) { return } # Invalid Map Name
     let $lastReplay = (LastReplay)
     print $lastReplay
     if ($lastReplay.ok == true) {
