@@ -169,9 +169,14 @@ void Board::addTile(const STileInfo& tuile)
             }
 
             int hashVoisin = pointVoisin.calculerHash();
-            if (!mapnoeuds.count(hashVoisin)) {
-                mapnoeuds[hashVoisin] = new Noeud{ pointVoisin, TileType::Unknown };
-                Noeud *noeudVoisin = getNoeud(hashVoisin);
+            auto itVoisin = mapnoeuds.find(hashVoisin);
+            Noeud *noeudVoisin;
+            if (itVoisin == mapnoeuds.end()) {
+                noeudVoisin = mapnoeuds[hashVoisin] = new Noeud{ pointVoisin, TileType::Unknown };
+            } else {
+                noeudVoisin = itVoisin->second;
+            }
+            if (noeudVoisin->getTiletype() == TileType::Unknown) {
                 noeudVoisin->addNeighbour(noeud);
                 noeud->addNeighbour(noeudVoisin);
             }
