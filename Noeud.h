@@ -81,6 +81,8 @@ public:
     int getDistanceVolGoal() const { return heuristiqueDistanceVolGoal; }
     void setDistanceVolGoal(int distance) { heuristiqueDistanceVolGoal = distance; }
     float getScoreExploration(int distanceNPC) const;
+
+    bool isANeighbour(const Noeud* neighbour) const;
 };
 
 #endif // NOEUD_H

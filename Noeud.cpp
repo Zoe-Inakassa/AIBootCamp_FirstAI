@@ -157,3 +157,12 @@ float Noeud::getScoreExploration(int distanceNPC) const
     // 10/2 + 1*3 = 8
     // 10/4 + 1*5 = 7.5
 }
+
+bool Noeud::isANeighbour(const Noeud* neighbour) const
+{
+    for(const Noeud* noeud: neighbours)
+    {
+        if(noeud == neighbour) return true;
+    }
+    return false;
+}
