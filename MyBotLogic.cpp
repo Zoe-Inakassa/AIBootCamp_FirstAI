@@ -122,7 +122,8 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 		// Obtenir les noeuds attaignables
 		std::vector<SNoeudDistance> noeudsAttaignables = Dijkstra::calculerDistances(
 			npc.getEmplacement(),
-			[](const Noeud *noeud) { return noeud->getNbVoisinsUnknown() > 0; });
+			[](const Noeud *noeud) { return noeud->getNbVoisinsUnknown() > 0; },
+			nbToursRestants);
 
 		// Modifier la valeur pour prendre en compte le score du noeud
 		for (auto& noeud : noeudsAttaignables) {
@@ -166,7 +167,9 @@ bool MyBotLogic::CalculerCheminsGoals(int nbToursRestants)
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)
 {
 	int nbToursRestants = maxTurnNumber - _turnData.turnNb+1;
-	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
+	std::string log = "GetTurnOrders:--------------------------------Tour n°";
+	log += std::to_string(_turnData.turnNb);
+	BOT_LOGIC_LOG(mLogger, log, true);
 	
 	//Mettre à jour la vision
 	board.updateBoard(_turnData, listeNPC);
@@ -216,6 +219,14 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	if (etatBot == EtatBot::Exploration)
 	{
 		BOT_LOGIC_LOG(mLogger, "4ème boucle: état Exploration", true);
+		for(NPC& npc : listeNPC)
+		{
+			if(npc.getState()!=NPCState::EXPLORATION_PAUSE && !npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
+			{
+				npc.setState(NPCState::EXPLORATION_PAUSE);
+				npc.clearChemin();
+			}
+		}
 		
 		// TODO :Décider du prochain mouvement des npcs
 		calculerScoreExploration(nbToursRestants); // à voir
