@@ -250,7 +250,8 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
 
             // S'il n'y a pas de mur pour bloquer la vue
             if (!emplacement->hasOpaqueMur(EHexCellDirection::E)) {
-                const Noeud *noeudE = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::E).calculerHash());
+                int hashNoeudE = emplacement->getPointNeighbour(EHexCellDirection::E).calculerHash();
+                const Noeud *noeudE = mapnoeuds.count(hashNoeudE) ? getNoeud(hashNoeudE) : nullptr;
                 // Les noeuds voisins existent forcément, sauf cas de bordure
                 if (noeudE == nullptr || noeudE->getTiletype() == TileType::Unknown) {
                     int xMax = emplacement->point.q + 2 * emplacement->point.r;
@@ -273,10 +274,11 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
             // TODO: on suppose pour l'instant une vision de 1
 
             // S'il n'y a pas de mur pour bloquer la vue
-            if (!emplacement->hasOpaqueMur(EHexCellDirection::SW)) {
-                const Noeud *noeudSW = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::SW).calculerHash());
+            if (!emplacement->hasOpaqueMur(EHexCellDirection::SE)) {
+                int hashNoeudSE = emplacement->getPointNeighbour(EHexCellDirection::SE).calculerHash();
+                const Noeud *noeudSE = mapnoeuds.count(hashNoeudSE) ? getNoeud(hashNoeudSE) : nullptr;
                 // Les noeuds voisins existent forcément, sauf cas de bordure
-                if (noeudSW == nullptr || noeudSW->getTiletype() == TileType::Unknown) {
+                if (noeudSE == nullptr || noeudSE->getTiletype() == TileType::Unknown) {
                     nombreTileMaxBas = emplacement->point.q;
                     bordureChangee = true;
                     break;
