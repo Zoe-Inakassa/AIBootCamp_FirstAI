@@ -51,7 +51,7 @@ void MyBotLogic::Init(const SInitData& _initData)
 	maxTurnNumber = _initData.maxTurnNb;
 }
 
-std::pair<NPC*,NPC*> MyBotLogic::realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution) const
+std::pair<NPC*,NPC*> MyBotLogic::realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution)
 {
 	std::map<const Noeud*, NPC*> noeuds;
 	for(auto npc : solution)
@@ -122,9 +122,9 @@ float MyBotLogic::calculerSolution(const std::map<NPC*, std::vector<SNoeudDistan
 	return value2;
 }
 
-void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
+bool MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
 {
-	if(mapDistances.empty()) return;
+	if(mapDistances.empty()) return false;
 	//Création d'une solution initiale
 	std::map<NPC*,int> solution;
 	for(auto npc : mapDistances)
@@ -136,7 +136,7 @@ void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 	if(retour == -1)
 	{
 		BOT_LOGIC_LOG(mLogger, "Aucune solution réalisable n'a été trouvée", true);
-		return;
+		return false;
 	}
 	
 	//Attribuer les objectifs
@@ -144,6 +144,8 @@ void MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 	{
 		npc.first->setObjectif(mapDistances.at(npc.first)[npc.second].pnoeud);
 	}
+
+	return true;
 }
 
 void MyBotLogic::setEtatBot(const EtatBot& etat)
@@ -228,9 +230,7 @@ bool MyBotLogic::CalculerCheminsGoals(int nbToursRestants)
 	}
 	
 	// Attribuer les objectifs
-	attribuerObjectifs(mapDistances);
-	// pas d'erreur
-	return true;
+	return attribuerObjectifs(mapDistances);
 }
 
 void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders)

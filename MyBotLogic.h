@@ -39,9 +39,9 @@ public:
 	virtual void Init(const SInitData& _initData);
 	virtual bool CalculerCheminsGoals(int nbToursRestants);
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
-	std::pair<NPC*,NPC*> realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution) const;
-	float calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution);
-	void attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
+	static std::pair<NPC*,NPC*> realisable(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, const std::map<NPC*,int>& solution);
+	static float calculerSolution(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, std::map<NPC*,int>& solution);
+	bool attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
 	void setEtatBot(const EtatBot&);
 	void calculerScoreExploration(int nbToursRestants);
 	std::map<const Noeud*, NPC*> solveurMouvements(NPCState npcStateFilter);
