@@ -108,10 +108,16 @@ void Board::addMur(const SObjectInfo& objet)
             noeudB = (*it).second;
         }
 
+        bool transparent = false;
+        for (int *type = objet.types; type != objet.types + objet.typesSize; ++type) {
+            if (*type == EObjectType::Window)
+                transparent = true;
+        }
+
         mapobjets[hashMur] = {
             noeudA,
             noeudB,
-            false
+            transparent
         };
         const Mur *mur = &mapobjets.at(hashMur);
 
@@ -243,7 +249,7 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
             // TODO: on suppose pour l'instant une vision de 1
 
             // S'il n'y a pas de mur pour bloquer la vue
-            if (!emplacement->hasMur(EHexCellDirection::E)) {
+            if (!emplacement->hasOpaqueMur(EHexCellDirection::E)) {
                 const Noeud *noeudE = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::E).calculerHash());
                 // Les noeuds voisins existent forcément, sauf cas de bordure
                 if (noeudE == nullptr || noeudE->getTiletype() == TileType::Unknown) {
@@ -267,7 +273,7 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
             // TODO: on suppose pour l'instant une vision de 1
 
             // S'il n'y a pas de mur pour bloquer la vue
-            if (!emplacement->hasMur(EHexCellDirection::SW)) {
+            if (!emplacement->hasOpaqueMur(EHexCellDirection::SW)) {
                 const Noeud *noeudSW = getNoeud(emplacement->getPointNeighbour(EHexCellDirection::SW).calculerHash());
                 // Les noeuds voisins existent forcément, sauf cas de bordure
                 if (noeudSW == nullptr || noeudSW->getTiletype() == TileType::Unknown) {

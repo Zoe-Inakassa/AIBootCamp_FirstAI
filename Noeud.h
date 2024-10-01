@@ -74,7 +74,7 @@ public:
     void addNeighbour(Noeud* neighbour);
     void removeNeighbour(const Noeud* neighbour);
     void addMur(const Mur *mur);
-    bool hasMur(EHexCellDirection cellDirection) const;
+    bool hasOpaqueMur(EHexCellDirection cellDirection) const;
     EHexCellDirection getDirection(const Noeud& other) const;
     Point getPointNeighbour(EHexCellDirection cellDirection) const;
     int getNbVoisinsUnknown() const { return nbVoisinsUnknown; }

@@ -103,10 +103,10 @@ void Noeud::addMur(const Mur* mur)
     removeNeighbour(oppose);
 }
 
-bool Noeud::hasMur(EHexCellDirection cellDirection) const
+bool Noeud::hasOpaqueMur(EHexCellDirection cellDirection) const
 {
     for (auto mur : murs) {
-        if (getDirection(*mur->getNoeudOppose(this)) == cellDirection) {
+        if (!mur->transparent && getDirection(*mur->getNoeudOppose(this)) == cellDirection) {
             return true;
         }
     }
