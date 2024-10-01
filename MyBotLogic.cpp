@@ -203,7 +203,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		
 		for(auto npc : listeNPC)
 		{
-			if(! npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
+			if(npc.getState()!=NPCState::FINISH && !npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
 			{
 				setEtatBot(EtatBot::Exploration);
 				break;
