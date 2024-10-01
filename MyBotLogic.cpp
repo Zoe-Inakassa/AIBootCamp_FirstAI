@@ -167,6 +167,10 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 {
 	int nbToursRestants = maxTurnNumber - _turnData.turnNb+1;
 	BOT_LOGIC_LOG(mLogger, "GetTurnOrders", true);
+	
+	//Mettre à jour la vision
+	board.updateBoard(_turnData, listeNPC);
+	
 	if(etatBot == EtatBot::Init)
 	{
 		BOT_LOGIC_LOG(mLogger, "1ère boucle: état Init", true);
@@ -177,13 +181,10 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			setEtatBot(EtatBot::Exploration);
 		}
 	}
-
+	
 	if (etatBot == EtatBot::Exploration)
 	{
 		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Exploration", true);
-
-		//Mettre à jour la vision
-		board.updateBoard(_turnData, listeNPC);
 
 		// S'il y a assez de goal
 		if (board.getGoals().size() >= listeNPC.size()) {
@@ -200,7 +201,16 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	{
 		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Moving", true);
 		
-		mouvements = solveurMouvements(NPCState::MOVING);
+		for(auto npc : listeNPC)
+		{
+			if(! npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
+			{
+				setEtatBot(EtatBot::Exploration);
+				break;
+			}
+		}
+		
+		if(etatBot==EtatBot::Moving) mouvements = solveurMouvements(NPCState::MOVING);
 	}
 
 	if (etatBot == EtatBot::Exploration)
