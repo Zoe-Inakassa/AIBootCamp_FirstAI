@@ -52,6 +52,11 @@ int NPC::tailleChemin() const
     return static_cast<int>(chemin.size());
 }
 
+void NPC::clearChemin()
+{
+    chemin.clear();
+}
+
 void NPC::setObjectif(const Noeud* objectif)
 {
     this->objectif = objectif;

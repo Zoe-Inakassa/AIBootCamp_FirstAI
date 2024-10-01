@@ -17,6 +17,9 @@ class NPC
 {
 public:
     NPC(const SNPCInfo &npc, const Noeud *emplacement);
+    NPC(const NPC& other) = delete;
+    NPC& operator=(const NPC& other) = delete;
+
     SOrder deplacer(const Noeud *voisin);
     const Noeud *getEmplacement() const { return emplacement; }
     const Noeud *getObjectif() const { return objectif; }
@@ -27,6 +30,7 @@ public:
     const Noeud* getNextTileOnPath() const;
     void setChemin(std::vector<const Noeud*>& chemin);
     int tailleChemin() const;
+    void clearChemin();
 
 private:
     const int id;
