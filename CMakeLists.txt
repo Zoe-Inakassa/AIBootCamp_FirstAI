@@ -37,6 +37,7 @@ SET( AIBOT_HEADERS
 	NPC.h
 	AStar.h
 	Mur.h
+	Solveur.h
 	TurnData.h
 	Noeud.h
 	Board.h
@@ -56,6 +57,7 @@ SET( AIBOT_SRC
 	MyBotLogic.cpp
 	NPC.cpp
 	AStar.cpp
+	Solveur.cpp
 	Noeud.cpp
 	Board.cpp
     Dijkstra.cpp
