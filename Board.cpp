@@ -89,24 +89,11 @@ void Board::addMur(const SObjectInfo& objet)
     if (!mapobjets.count(hashMur))
     {
         // Obtenir ou créer le noeud
-        auto it = mapnoeuds.find(hashA);
-        Noeud *noeudA;
-        if (it == mapnoeuds.end()) {
-            noeudA = mapnoeuds[hashA] = new Noeud(pointA, TileType::Unknown);
-        } else {
-            noeudA = (*it).second;
-        }
+        Noeud *noeudA = getOrCreateNoeudFictif(pointA);
         
         // Obtenir ou créer le noeud
         Point pointB = noeudA->getPointNeighbour(objet.cellPosition);
-        int hashB = pointB.calculerHash();
-        it = mapnoeuds.find(hashB);
-        Noeud *noeudB;
-        if (it == mapnoeuds.end()) {
-            noeudB = mapnoeuds[hashB] = new Noeud(pointB, TileType::Unknown);
-        } else {
-            noeudB = (*it).second;
-        }
+        Noeud *noeudB = getOrCreateNoeudFictif(pointB);
 
         bool transparent = false;
         for (int *type = objet.types; type != objet.types + objet.typesSize; ++type) {
@@ -126,7 +113,23 @@ void Board::addMur(const SObjectInfo& objet)
     }
 }
 
-void Board::addTile(const STileInfo& tuile)
+bool Board::pointEstPossible(Point point) const
+{
+    int x = point.q + 2 * point.r;
+    // y = point.q
+    if (point.q < 0 || nombreTileMaxBas < point.q) {
+        // Le point est plus haut que 0,0 ou plus bas que le noeud le plus bas autorisé
+        return false;
+    }
+    if (x < 0 || nombreTileMaxDroite < x) {
+        // Le point est à gauche de 0,0 ou plus à droite que le noeud le plus à droite autorisé
+        return false;
+    }
+    // Le point existe peut-être, d'aprés les informations actuelles.
+    return true;
+}
+
+void Board::addTile(const STileInfo &tuile)
 {
     Point point = Point{tuile.q, tuile.r};
     int hash = point.calculerHash();
@@ -144,22 +147,7 @@ void Board::addTile(const STileInfo& tuile)
     default:
         throw ExceptionCellTypeInconnu{};
     }
-    Noeud *noeud;
-    if(existNoeud(hash))
-    {
-        noeud = getNoeud(hash);
-        if(noeud->getTiletype() == TileType::Unknown)
-        {
-            noeud->setTiletype(tiletype);
-        }
-        else
-        {
-            return;
-        }
-    }else
-    {
-        noeud = mapnoeuds[hash] = new Noeud(point, tiletype);
-    }
+    Noeud *noeud = getOrCreateNoeud(point, tiletype, true);
 
     if (tiletype == TileType::Goal) {
         goalDecouvert = true;
@@ -174,14 +162,7 @@ void Board::addTile(const STileInfo& tuile)
                 continue;
             }
 
-            int hashVoisin = pointVoisin.calculerHash();
-            auto itVoisin = mapnoeuds.find(hashVoisin);
-            Noeud *noeudVoisin;
-            if (itVoisin == mapnoeuds.end()) {
-                noeudVoisin = mapnoeuds[hashVoisin] = new Noeud{ pointVoisin, TileType::Unknown };
-            } else {
-                noeudVoisin = itVoisin->second;
-            }
+            Noeud *noeudVoisin = getOrCreateNoeud(pointVoisin, TileType::Unknown, false);
             if (noeudVoisin->getTiletype() == TileType::Unknown) {
                 noeudVoisin->addNeighbour(noeud);
                 noeud->addNeighbour(noeudVoisin);
@@ -190,20 +171,29 @@ void Board::addTile(const STileInfo& tuile)
     }
 }
 
-bool Board::pointEstPossible(Point point) const
+Noeud *Board::getOrCreateNoeud(Point point, TileType type, bool updateType)
 {
-    int x = point.q + 2 * point.r;
-    // y = point.q
-    if (point.q < 0 || nombreTileMaxBas < point.q) {
-        // Le point est plus haut que 0,0 ou plus bas que le noeud le plus bas autorisé
-        return false;
+    int hash = point.calculerHash();
+    auto itNoeud = mapnoeuds.find(hash);
+
+    if (!pointEstPossible(point)) {
+        type = TileType::Forbidden;
     }
-    if (x < 0 || nombreTileMaxDroite < x) {
-        // Le point est à gauche de 0,0 ou plus à droite que le noeud le plus à droite autorisé
-        return false;
+
+    if (itNoeud != mapnoeuds.end()) {
+        Noeud *noeud = itNoeud->second;
+        if(updateType && noeud->getTiletype() == TileType::Unknown) {
+            noeud->setTiletype(type);
+        }
+        return noeud;
     }
-    // Le point existe peut-être, d'aprés les informations actuelles.
-    return true;
+
+    return mapnoeuds[hash] = new Noeud(point, type);
+}
+
+Noeud *Board::getOrCreateNoeudFictif(Point point)
+{
+    return getOrCreateNoeud(point, TileType::Unknown, false);
 }
 
 void Board::calculerDistancesGoalsTousNoeuds()

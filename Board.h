@@ -24,12 +24,10 @@ public:
     void updateBoard(const STurnData &_turnData, const std::vector<NPC*> &listeNPC);
     void addMur(const SObjectInfo& objet);
 
-    bool existMur(int id)
+    bool existMur(int id) const
     {
         return mapobjets.find(id) != mapobjets.end();
     };
-    
-    void addTile(const STileInfo& tuile);
     
     bool existNoeud(int id)
     {
@@ -51,6 +49,10 @@ public:
     }
 
 private:
+    void addTile(const STileInfo& tuile);
+    Noeud *getOrCreateNoeud(Point point, TileType type, bool updateType);
+    Noeud *getOrCreateNoeudFictif(Point point);
+    
     void calculerDistancesGoalsTousNoeuds();
     void calculerDistancesGoalsUnNoeud(Noeud *noeud);
     void calculerBordures(const std::vector<NPC*> &listeNPC);
