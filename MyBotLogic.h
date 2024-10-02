@@ -39,7 +39,7 @@ public:
 	virtual void Init(const SInitData& _initData);
 	virtual bool CalculerCheminsGoals(int nbToursRestants);
 	virtual void GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _orders);
-	bool attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances);
+	bool attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, bool poidsParMax = true);
 	void setEtatBot(const EtatBot&);
 	void calculerScoreExploration(int nbToursRestants);
 	std::map<const Noeud*, NPC*> solveurMouvements(NPCState npcStateFilter);

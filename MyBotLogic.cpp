@@ -55,7 +55,7 @@ void MyBotLogic::Init(const SInitData& _initData)
 	maxTurnNumber = _initData.maxTurnNb;
 }
 
-bool MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances)
+bool MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDistance>>& mapDistances, bool poidsParMax)
 {
 	if(mapDistances.empty()) return false;
 	//Création d'une solution initiale
@@ -65,7 +65,7 @@ bool MyBotLogic::attribuerObjectifs(const std::map<NPC*, std::vector<SNoeudDista
 		solution[npc.first] = 0;
 	}
 
-	float retour = Solveur::calculerSolution(mapDistances, solution);
+	float retour = Solveur::calculerSolution(mapDistances, solution, poidsParMax);
 	if(retour == -1)
 	{
 		BOT_LOGIC_LOG(mLogger, "Aucune solution réalisable n'a été trouvée", true);
@@ -148,7 +148,7 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 			});
 
 		// Ajouter l'emplacement actuel du NPC, pour lui permettre de rester sur place en dernier recours
-		noeudsAttaignables.push_back({ npc.getEmplacement(), INFINITY });
+		noeudsAttaignables.push_back({ npc.getEmplacement(), 1000000 });
 
 		mapExplorationDistances[&npc] = noeudsAttaignables;
 	}
@@ -245,7 +245,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		
 		// TODO :Décider du prochain mouvement des npcs
 		calculerScoreExploration(nbToursRestants); // à voir
-		attribuerObjectifs(mapExplorationDistances);
+		attribuerObjectifs(mapExplorationDistances, false);
 
 		for(NPC *pNPC : listeNPC)
 		{

@@ -19,7 +19,10 @@ std::pair<NPC *, NPC *> Solveur::realisable(const std::map<NPC *, std::vector<SN
 	return {nullptr,nullptr};
 }
 
-float Solveur::calculerSolution(const std::map<NPC *, std::vector<SNoeudDistance>> &mapDistances, std::map<NPC *, int> &solution)
+float Solveur::calculerSolution(
+	const std::map<NPC *, std::vector<SNoeudDistance>> &mapDistances,
+	std::map<NPC *, int> &solution,
+	bool poidsPaxMax)
 {
 	std::pair<NPC*,NPC*> npcs = realisable(mapDistances, solution);
 	if(npcs.first == nullptr) //realisable
@@ -30,7 +33,11 @@ float Solveur::calculerSolution(const std::map<NPC *, std::vector<SNoeudDistance
 			if(!mapDistances.at(npc.first).empty())
 			{
 				float valeur = mapDistances.at(npc.first)[npc.second].score;
-				if(valeur>max) max = valeur;
+				if (poidsPaxMax) {
+					if(valeur > max) max = valeur;
+				} else {
+					max += valeur;
+				}
 			}
 		}
 		return max;
@@ -44,7 +51,7 @@ float Solveur::calculerSolution(const std::map<NPC *, std::vector<SNoeudDistance
 	{
 		copiesolution1 = solution;
 		copiesolution1[npcs.first] = copiesolution1.at(npcs.first)+1;
-		value1 = calculerSolution(mapDistances, copiesolution1);
+		value1 = calculerSolution(mapDistances, copiesolution1, poidsPaxMax);
 	}
 	
 	//Relancer sur le deuxième conflit
@@ -53,7 +60,7 @@ float Solveur::calculerSolution(const std::map<NPC *, std::vector<SNoeudDistance
 	{
 		copiesolution2 = solution;
 		copiesolution2[npcs.second] = copiesolution2.at(npcs.second)+1;
-		value2 = calculerSolution(mapDistances, copiesolution2);
+		value2 = calculerSolution(mapDistances, copiesolution2, poidsPaxMax);
 	}
 
 	// Retourne la solution avec le score le plus faible et qui fonctionne (qui n'est pas NaN)
