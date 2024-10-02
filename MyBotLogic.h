@@ -52,4 +52,5 @@ protected:
 	int maxTurnNumber;
 	EtatBot etatBot;
 
+	void debugMapExploration(NPC &npc);
 };

@@ -192,20 +192,6 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		}
 	}
 	
-	if (etatBot == EtatBot::Exploration)
-	{
-		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Exploration", true);
-
-		// S'il y a assez de goal
-		if (board.getGoals().size() >= listeNPC.size()) {
-			if (CalculerCheminsGoals(nbToursRestants)) {
-				// Les objectifs sont attribués
-				setEtatBot(EtatBot::Moving);
-			}
-			// Sinon, un NPC n'a pas de goal accessible, continuer d'explorer
-		}
-	}
-
 	std::map<const Noeud*, NPC*> mouvements;
 	if(etatBot == EtatBot::Moving)
 	{
@@ -221,7 +207,20 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			}
 		}
 		
-		if(etatBot==EtatBot::Moving) mouvements = solveurMouvements(NPCState::MOVING);
+	}
+
+	if (etatBot == EtatBot::Exploration)
+	{
+		BOT_LOGIC_LOG(mLogger, "2ème boucle: état Exploration", true);
+
+		// S'il y a assez de goal
+		if (board.getGoals().size() >= listeNPC.size()) {
+			if (CalculerCheminsGoals(nbToursRestants)) {
+				// Les objectifs sont attribués
+				setEtatBot(EtatBot::Moving);
+			}
+			// Sinon, un NPC n'a pas de goal accessible, continuer d'explorer
+		}
 	}
 
 	if (etatBot == EtatBot::Exploration)
@@ -245,28 +244,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		for(NPC *pNPC : listeNPC)
 		{
 			NPC &npc = *pNPC;
-			std::string log = "  NPC ";
-			log += std::to_string(npc.getId());
-			log += " : q=";
-			log += std::to_string(npc.getEmplacement()->point.q);
-			log += ", r=";
-			log += std::to_string(npc.getEmplacement()->point.r);
-			log += "\n";
-			if (mapExplorationDistances.count(&npc)) {
-				for (const SNoeudDistance &distance : mapExplorationDistances.at(&npc))
-				{
-					log += "    q=";
-					log += std::to_string(distance.pnoeud->point.q);
-					log += ", r=";
-					log += std::to_string(distance.pnoeud->point.r);
-					log += " => score=";
-					log += std::to_string(distance.score);
-					if (distance.pnoeud == npc.getObjectif())
-						log += " (OBJECTIF)";
-					log += "\n";
-				}
-			}
-			BOT_LOGIC_LOG(mLogger, log, false);
+			debugMapExploration(npc);
 
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
 			if(!chemin.empty())
@@ -277,6 +255,8 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		}
 		mouvements = solveurMouvements(NPCState::EXPLORATION);
 	}
+
+	if(etatBot==EtatBot::Moving) mouvements = solveurMouvements(NPCState::MOVING);
 
 	BOT_LOGIC_LOG(mLogger, "Deplacer les NPC", true);
 	for (auto& mouvement : mouvements)
@@ -338,4 +318,24 @@ std::map<const Noeud*, NPC*> MyBotLogic::solveurMouvements(NPCState npcStateFilt
 	}
 
 	return mouvements;
+}
+
+void MyBotLogic::debugMapExploration(NPC &npc)
+{
+	std::string log = "  NPC " + std::to_string(npc.getId());
+	log += " : q=" + std::to_string(npc.getEmplacement()->point.q);
+	log += ", r=" + std::to_string(npc.getEmplacement()->point.r);
+	log += "\n";
+	if (mapExplorationDistances.count(&npc)) {
+		for (const SNoeudDistance &distance : mapExplorationDistances.at(&npc))
+		{
+			log += "    q=" + std::to_string(distance.pnoeud->point.q);
+			log += ", r=" + std::to_string(distance.pnoeud->point.r);
+			log += " => score=" + std::to_string(distance.score);
+			if (distance.pnoeud == npc.getObjectif())
+				log += " (OBJECTIF)";
+			log += "\n";
+		}
+	}
+	BOT_LOGIC_LOG(mLogger, log, false);
 }
