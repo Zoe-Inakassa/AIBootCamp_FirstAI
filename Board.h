@@ -21,7 +21,7 @@ public:
     Board();
     ~Board();
     void initBoard(const SInitData &_initData);
-    void updateBoard(const STurnData &_turnData, const std::vector<NPC> &listeNPC);
+    void updateBoard(const STurnData &_turnData, const std::vector<NPC*> &listeNPC);
     void addMur(const SObjectInfo& objet);
 
     bool existMur(int id)
@@ -53,7 +53,7 @@ public:
 private:
     void calculerDistancesGoalsTousNoeuds();
     void calculerDistancesGoalsUnNoeud(Noeud *noeud);
-    void calculerBordures(const std::vector<NPC> &listeNPC);
+    void calculerBordures(const std::vector<NPC*> &listeNPC);
 };
 
 #endif // BOARD_H

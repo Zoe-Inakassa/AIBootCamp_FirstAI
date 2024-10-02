@@ -21,7 +21,10 @@ MyBotLogic::MyBotLogic(): etatBot{EtatBot::Init}, maxTurnNumber(0)
 
 MyBotLogic::~MyBotLogic()
 {
-	//Write Code Here
+	for (NPC *pNPC : listeNPC) {
+		delete pNPC;
+	}
+	listeNPC.clear();
 }
 
 void MyBotLogic::Configure(const SConfigData& _configData)
@@ -46,7 +49,7 @@ void MyBotLogic::Init(const SInitData& _initData)
 	listeNPC.reserve(_initData.nbNPCs);
 	for (auto pNPC = _initData.npcInfoArray; pNPC < _initData.npcInfoArray + _initData.nbNPCs; ++pNPC) {
 		auto pNoeud = board.getNoeud(Point::calculerHash(pNPC->q, pNPC->r));
-		listeNPC.push_back(NPC{*pNPC, pNoeud});
+		listeNPC.push_back(new NPC{*pNPC, pNoeud});
 	}
 
 	maxTurnNumber = _initData.maxTurnNb;
@@ -83,15 +86,17 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 	etatBot = etat;
 	if(etat == EtatBot::Exploration) // On presume que le bot était à l'état Init
 	{
-		for(NPC& npc : listeNPC)
+		for(NPC *pNPC : listeNPC)
 		{
+			NPC &npc = *pNPC;
 			npc.setState(NPCState::EXPLORATION_PAUSE);
 		}
 	}
 	if(etat == EtatBot::Moving)
 	{
-		for(NPC& npc : listeNPC)
+		for(NPC *pNPC : listeNPC)
 		{
+			NPC &npc = *pNPC;
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
 			if(!chemin.empty())
 			{
@@ -111,7 +116,8 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 	// Sélectionner les tuiles à explorer selon le score
 	// TODO : ne pas oublier d'éloigner les NPC pour maximiser l'exploration
 	mapExplorationDistances.clear();
-	for (NPC &npc : listeNPC) {
+	for(NPC *pNPC : listeNPC) {
+		NPC &npc = *pNPC;
 		if (npc.getState() == NPCState::EXPLORATION && npc.getObjectif()->getNbVoisinsUnknown() > 0) {
 			// Le NPC se dirige vers une case pouvant être explorée, pas besoin de recalculer
 			continue;
@@ -146,8 +152,9 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 bool MyBotLogic::CalculerCheminsGoals(int nbToursRestants)
 {
 	std::map<NPC*, std::vector<SNoeudDistance>> mapDistances;
-	for(NPC& npc : listeNPC)
+	for(NPC *pNPC : listeNPC)
 	{
+		NPC &npc = *pNPC;
 		// Appliquer dijkstra et vérifier si au moins un objectif est trouvable dans le nombre de tours impartis
 		std::vector<SNoeudDistance> distances = Dijkstra::calculerDistances(npc.getEmplacement(), nbToursRestants);
 		if(!distances.empty())
@@ -204,8 +211,9 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	{
 		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Moving", true);
 		
-		for(const NPC &npc : listeNPC)
+		for(const NPC *pNPC : listeNPC)
 		{
+			const NPC &npc = *pNPC;
 			if(npc.getState()!=NPCState::FINISH && !npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
 			{
 				setEtatBot(EtatBot::Exploration);
@@ -219,8 +227,9 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	if (etatBot == EtatBot::Exploration)
 	{
 		BOT_LOGIC_LOG(mLogger, "4ème boucle: état Exploration", true);
-		for(NPC& npc : listeNPC)
+		for(NPC *pNPC : listeNPC)
 		{
+			NPC &npc = *pNPC;
 			if(npc.getState()!=NPCState::EXPLORATION_PAUSE && !npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
 			{
 				npc.setState(NPCState::EXPLORATION_PAUSE);
@@ -233,8 +242,9 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		attribuerObjectifs(mapExplorationDistances);
 
 		BOT_LOGIC_LOG(mLogger, "Score exploration :", true);
-		for(NPC& npc : listeNPC)
+		for(NPC *pNPC : listeNPC)
 		{
+			NPC &npc = *pNPC;
 			std::string log = "  NPC ";
 			log += std::to_string(npc.getId());
 			log += " : q=";
@@ -279,8 +289,9 @@ std::map<const Noeud*, NPC*> MyBotLogic::solveurMouvements(NPCState npcStateFilt
 {
 	std::map<const Noeud*, NPC*> mouvements;
 	
-	for(NPC& npc : listeNPC)
+	for(NPC *pNPC : listeNPC)
 	{
+		NPC &npc = *pNPC;
 		const Noeud *noeudSuivant = nullptr;
 		if(npc.getState() == npcStateFilter)
 			noeudSuivant = npc.getNextTileOnPath();

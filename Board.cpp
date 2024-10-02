@@ -51,7 +51,7 @@ void Board::initBoard(const SInitData& _initData)
     }
 }
 
-void Board::updateBoard(const STurnData &_turnData, const std::vector<NPC> &listeNPC)
+void Board::updateBoard(const STurnData &_turnData, const std::vector<NPC*> &listeNPC)
 {
     goalDecouvert = false;
     for(int i=0; i!=_turnData.tileInfoArraySize; i++)
@@ -235,7 +235,7 @@ void Board::calculerDistancesGoalsUnNoeud(Noeud* noeud)
     }
 }
 
-void Board::calculerBordures(const std::vector<NPC> &listeNPC)
+void Board::calculerBordures(const std::vector<NPC*> &listeNPC)
 {
     // Si un NPC pourrait voir une tile mais que celle-ci n'existe pas ou est UNKNOWN
     // Alors, nous sommes à la bordure
@@ -244,8 +244,8 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
 
     // Trouver la bordure droite
     if (nombreTileMaxDroite == INT_MAX) {
-        for (const NPC &npc : listeNPC) {
-            const Noeud *emplacement = npc.getEmplacement();
+        for(NPC *pNPC : listeNPC) {
+            const Noeud *emplacement = pNPC->getEmplacement();
             // TODO: on suppose pour l'instant une vision de 1
 
             // S'il n'y a pas de mur pour bloquer la vue
@@ -269,8 +269,8 @@ void Board::calculerBordures(const std::vector<NPC> &listeNPC)
 
     // Trouver la bordure basse
     if (nombreTileMaxBas == INT_MAX) {
-        for (const NPC &npc : listeNPC) {
-            const Noeud *emplacement = npc.getEmplacement();
+		for(NPC *pNPC : listeNPC) {
+            const Noeud *emplacement = pNPC->getEmplacement();
             // TODO: on suppose pour l'instant une vision de 1
 
             // S'il n'y a pas de mur pour bloquer la vue
