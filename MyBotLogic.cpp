@@ -204,7 +204,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 	{
 		BOT_LOGIC_LOG(mLogger, "3ème boucle: état Moving", true);
 		
-		for(auto npc : listeNPC)
+		for(const NPC &npc : listeNPC)
 		{
 			if(npc.getState()!=NPCState::FINISH && !npc.getEmplacement()->isANeighbour(npc.getNextTileOnPath()))
 			{
