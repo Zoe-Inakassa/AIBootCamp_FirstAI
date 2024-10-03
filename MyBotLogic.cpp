@@ -243,7 +243,9 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			}
 		}
 		
-		calculerScoreExploration(nbToursRestants); // à voir
+		// Mettre un score sur les noeuds à explorer (avec des voisins unknown)
+		calculerScoreExploration(nbToursRestants);
+		// Répartir les noeuds pour que 2 NPC n'explorent pas le même noeud
 		attribuerObjectifs(mapExplorationDistances, false);
 
 		for(NPC *pNPC : listeNPC)
