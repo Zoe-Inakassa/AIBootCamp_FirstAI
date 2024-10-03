@@ -14,7 +14,7 @@
 #include "TurnData.h"
 #include "Solveur.h"
 
-MyBotLogic::MyBotLogic(): etatBot{EtatBot::Init}, maxTurnNumber(0)
+MyBotLogic::MyBotLogic(): maxTurnNumber(0), etatBot{EtatBot::Init}
 {
 	//Write Code Here
 }
@@ -119,7 +119,7 @@ void MyBotLogic::setEtatBot(const EtatBot& etat)
 void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 {
 	// Sélectionner les tuiles à explorer selon le score
-	// TODO : ne pas oublier d'éloigner les NPC pour maximiser l'exploration
+	// TODO : Éloigner les NPC pour maximiser l'exploration
 	mapExplorationDistances.clear();
 	for(NPC *pNPC : listeNPC) {
 		NPC &npc = *pNPC;
@@ -243,7 +243,6 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			}
 		}
 		
-		// TODO :Décider du prochain mouvement des npcs
 		calculerScoreExploration(nbToursRestants); // à voir
 		attribuerObjectifs(mapExplorationDistances, false);
 

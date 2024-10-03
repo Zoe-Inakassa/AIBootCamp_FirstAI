@@ -27,7 +27,7 @@ std::vector<SNoeudDistance> Dijkstra::calculerDistances(
     
     // Exploration avec Dijkstra
     int index = 0;
-    while (index!=noeudsAExplorer.size() && noeudsAExplorer.at(index).score < distanceMax){
+    while (index != noeudsAExplorer.size() && noeudsAExplorer.at(index).score < distanceMax){
         // Explorer les voisins (un voisin est forcément accessible)
         float distance = noeudsAExplorer.at(index).score + 1;
         for (auto voisin : noeudsAExplorer.at(index).pnoeud->getNeighbours()) {
