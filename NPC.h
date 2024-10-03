@@ -24,8 +24,9 @@ public:
     const Noeud *getEmplacement() const { return emplacement; }
     const Noeud *getObjectif() const { return objectif; }
     void setObjectif(const Noeud* objectif);
-    int getId() const;
-    NPCState getState() const;
+    int getId() const { return id; }
+    int getVisionRange() const { return visionRange; }
+    NPCState getState() const { return state; }
     void setState(NPCState state);
     const Noeud* getNextTileOnPath() const;
     void setChemin(std::vector<const Noeud*>& chemin);
@@ -34,6 +35,7 @@ public:
 
 private:
     const int id;
+    const int visionRange;
     NPCState state;
     const Noeud *emplacement; // Tile actuel
     const Noeud *objectif; // Goal ou objectif du chemin

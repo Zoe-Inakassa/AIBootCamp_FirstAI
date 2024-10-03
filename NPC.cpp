@@ -1,7 +1,7 @@
 #include "NPC.h"
 
 NPC::NPC(const SNPCInfo &npc, const Noeud *emplacement)
-    : id{npc.uid}, state{NPCState::INIT}, emplacement{emplacement}, objectif{nullptr}
+    : id{npc.uid}, visionRange{npc.visionRange}, state{NPCState::INIT}, emplacement{emplacement}, objectif{nullptr}
 {
 }
 
@@ -24,16 +24,6 @@ SOrder NPC::deplacer(const Noeud *noeudVoisin)
         id,
         direction
     };
-}
-
-int NPC::getId() const
-{
-    return id;
-}
-
-NPCState NPC::getState() const
-{
-    return state;
 }
 
 const Noeud* NPC::getNextTileOnPath() const
