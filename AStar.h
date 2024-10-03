@@ -15,8 +15,6 @@ public:
 private:
     static int calculerHeuristique(const Noeud *noeudA, const Noeud *noeudB)
     {
-        // TODO
-        // return noeudA->getDistanceVolOiseau(noeudB);
-        return 0;
+        return noeudA->point.calculerDistance(noeudB->point);
     }
 };
