@@ -10,6 +10,12 @@
 class ExceptionCellTypeInconnu{};
 class ExceptionChangementTileTypeInvalide{};
 
+// Coefficients de l'heuristique d'exploration
+// voir Noeud::getScoreExploration
+const float COEFFICIENT_VOISINS_UNKNOWN = 2;
+const float COEFFICIENT_DISTANCE_NPC = 2;
+const float COEFFICIENT_DISTANCE_GOAL = 0.75;
+
 struct Point {
     int q;
     int r;
