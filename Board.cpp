@@ -24,10 +24,7 @@ void Board::initBoard(const SInitData& _initData)
 
     // Enregistrer les murs
     for (auto pObjet = _initData.objectInfoArray; pObjet != _initData.objectInfoArray + _initData.objectInfoArraySize; ++pObjet) {
-        Point pointA{pObjet->q, pObjet->r};
-        int hashA = pointA.calculerHash();
-        int hashMur = Mur::calculerHash(hashA, pObjet->cellPosition);
-        if(!existMur(hashMur))
+        if(!existMur(pObjet->uid))
         {
             addMur(*pObjet);
         }
@@ -38,7 +35,7 @@ void Board::initBoard(const SInitData& _initData)
         std::vector<Point> points = noeud.second->point.surroundingPoints();
         for (auto& point : points)
         {
-            auto adresse = mapnoeuds.find(point.calculerHash());
+            auto adresse = mapnoeuds.find(point);
             if(adresse !=mapnoeuds.end())
             {
                 noeud.second->addNeighbour(adresse->second);
@@ -58,17 +55,14 @@ void Board::updateBoard(const STurnData &_turnData, const std::vector<NPC*> &lis
 	{
 		STileInfo tuile = _turnData.tileInfoArray[i];
 		addTile(tuile);
-        int hash = Point::calculerHash(tuile.q,tuile.r);
-        calculerDistancesGoalsUnNoeud(mapnoeuds.at(hash));
+        Point point{tuile.q, tuile.r};
+        calculerDistancesGoalsUnNoeud(mapnoeuds.at(point));
 	}
 	
 	for(int i=0; i!=_turnData.objectInfoArraySize; i++)
 	{
 		SObjectInfo object = _turnData.objectInfoArray[i];
-		Point pointA{object.q, object.r};
-		int hashA = pointA.calculerHash();
-		int hashMur = Mur::calculerHash(hashA, object.cellPosition);
-		if(!existMur(hashMur))
+		if(!existMur(object.uid))
 		{
 			addMur(object);
 		}
@@ -84,9 +78,7 @@ void Board::updateBoard(const STurnData &_turnData, const std::vector<NPC*> &lis
 void Board::addMur(const SObjectInfo& objet)
 {
     Point pointA{objet.q, objet.r};
-    int hashA = pointA.calculerHash();
-    int hashMur = Mur::calculerHash(hashA, objet.cellPosition);
-    if (!mapobjets.count(hashMur))
+    if (!mapobjets.count(objet.uid))
     {
         // Obtenir ou créer le noeud
         Noeud *noeudA = getOrCreateNoeudFictif(pointA);
@@ -101,12 +93,12 @@ void Board::addMur(const SObjectInfo& objet)
                 transparent = true;
         }
 
-        mapobjets[hashMur] = {
+        mapobjets[objet.uid] = {
             noeudA,
             noeudB,
             transparent
         };
-        const Mur *mur = &mapobjets.at(hashMur);
+        const Mur *mur = &mapobjets.at(objet.uid);
 
         noeudA->addMur(mur);
         noeudB->addMur(mur);
@@ -132,7 +124,6 @@ bool Board::pointEstPossible(Point point) const
 void Board::addTile(const STileInfo &tuile)
 {
     Point point = Point{tuile.q, tuile.r};
-    int hash = point.calculerHash();
     TileType tiletype;
     switch (tuile.type) {
     case Default:
@@ -173,8 +164,7 @@ void Board::addTile(const STileInfo &tuile)
 
 Noeud *Board::getOrCreateNoeud(Point point, TileType type, bool updateType)
 {
-    int hash = point.calculerHash();
-    auto itNoeud = mapnoeuds.find(hash);
+    auto itNoeud = mapnoeuds.find(point);
 
     if (!pointEstPossible(point)) {
         type = TileType::Forbidden;
@@ -188,7 +178,7 @@ Noeud *Board::getOrCreateNoeud(Point point, TileType type, bool updateType)
         return noeud;
     }
 
-    return mapnoeuds[hash] = new Noeud(point, type);
+    return mapnoeuds[point] = new Noeud(point, type);
 }
 
 Noeud *Board::getOrCreateNoeudFictif(Point point)
@@ -240,8 +230,8 @@ void Board::calculerBordures(const std::vector<NPC*> &listeNPC)
 
             // S'il n'y a pas de mur pour bloquer la vue
             if (!emplacement->hasOpaqueMur(EHexCellDirection::E)) {
-                int hashNoeudE = emplacement->getPointNeighbour(EHexCellDirection::E).calculerHash();
-                const Noeud *noeudE = mapnoeuds.count(hashNoeudE) ? getNoeud(hashNoeudE) : nullptr;
+                Point pointE = emplacement->getPointNeighbour(EHexCellDirection::E);
+                const Noeud *noeudE = mapnoeuds.count(pointE) ? getNoeud(pointE) : nullptr;
                 // Les noeuds voisins existent forcément, sauf cas de bordure
                 if (noeudE == nullptr || noeudE->getTiletype() == TileType::Unknown) {
                     int xMax = emplacement->point.q + 2 * emplacement->point.r;
@@ -265,8 +255,8 @@ void Board::calculerBordures(const std::vector<NPC*> &listeNPC)
 
             // S'il n'y a pas de mur pour bloquer la vue
             if (!emplacement->hasOpaqueMur(EHexCellDirection::SE)) {
-                int hashNoeudSE = emplacement->getPointNeighbour(EHexCellDirection::SE).calculerHash();
-                const Noeud *noeudSE = mapnoeuds.count(hashNoeudSE) ? getNoeud(hashNoeudSE) : nullptr;
+                Point pointSE = emplacement->getPointNeighbour(EHexCellDirection::SE);
+                const Noeud *noeudSE = mapnoeuds.count(pointSE) ? getNoeud(pointSE) : nullptr;
                 // Les noeuds voisins existent forcément, sauf cas de bordure
                 if (noeudSE == nullptr || noeudSE->getTiletype() == TileType::Unknown) {
                     nombreTileMaxBas = emplacement->point.q;

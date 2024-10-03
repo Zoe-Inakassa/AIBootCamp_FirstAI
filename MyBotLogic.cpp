@@ -48,7 +48,7 @@ void MyBotLogic::Init(const SInitData& _initData)
 	// Enregistrer les NPC
 	listeNPC.reserve(_initData.nbNPCs);
 	for (auto pNPC = _initData.npcInfoArray; pNPC < _initData.npcInfoArray + _initData.nbNPCs; ++pNPC) {
-		auto pNoeud = board.getNoeud(Point::calculerHash(pNPC->q, pNPC->r));
+		auto pNoeud = board.getNoeud(Point{pNPC->q, pNPC->r});
 		listeNPC.push_back(new NPC{*pNPC, pNoeud});
 	}
 

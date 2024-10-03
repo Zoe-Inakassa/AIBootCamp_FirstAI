@@ -10,7 +10,7 @@
 class ExceptionNoeudConnuEnDehors{};
 
 class Board{
-    std::map<int, Noeud*> mapnoeuds;
+    std::map<Point, Noeud*> mapnoeuds;
     std::set<Noeud*> goals;
     std::map<int, Mur> mapobjets;
     bool goalDecouvert;
@@ -26,24 +26,24 @@ public:
 
     bool existMur(int id) const
     {
-        return mapobjets.find(id) != mapobjets.end();
+        return mapobjets.count(id);
     };
     
-    bool existNoeud(int id)
+    bool existNoeud(Point point) const
     {
-        return mapnoeuds.find(id) != mapnoeuds.end();
+        return mapnoeuds.count(point);
     }
 
     bool pointEstPossible(Point point) const;
     
-    const std::map<int, Noeud*> &getNoeuds() { return mapnoeuds; }
+    const std::map<Point, Noeud*> &getNoeuds() { return mapnoeuds; }
 
-    Noeud *getNoeud(int id)
+    Noeud *getNoeud(Point point)
     {
-        return mapnoeuds.at(id);
+        return mapnoeuds.at(point);
     }
     
-    const std::set<Noeud*> &getGoals()
+    const std::set<Noeud*> &getGoals() const
     {
         return goals;
     }

@@ -26,13 +26,15 @@ struct Point {
     bool operator!=(const Point &other) const {
         return !(*this == other);
     }
+
+    // Comparaison utilisée dans mapnoeuds
+    bool operator<(const Point &point)  const {
+        if (q != point.q) return q < point.q;
+        return r < point.r;
+    }
     
     static int calculerDistanceCoordonnes(int q1, int r1, int q2, int r2);
 
-    int calculerHash() const { return calculerHash(q, r);}
-
-    // 4 bits pour la direction du Mur | q limite [-2^13;2^13-1] | r limite [-2^13;2^13-1]
-    static int calculerHash(const int q, const int r){ return (q << 14) + r; }
     std::vector<Point> surroundingPoints() const;
 };
 
