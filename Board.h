@@ -15,6 +15,8 @@ class Board{
     std::map<int, Mur> mapobjets;
     bool goalDecouvert;
     int nombreTileMaxDroite;
+    int nombreTileMaxDroitePair;
+    int nombreTileMaxDroiteImpair;
     int nombreTileMaxBas;
     
 public:
@@ -56,6 +58,8 @@ private:
     void calculerDistancesGoalsTousNoeuds();
     void calculerDistancesGoalsUnNoeud(Noeud *noeud);
     void calculerBordures(const std::vector<NPC*> &listeNPC);
+    // Partir dans une direction pour trouver le noeud limite
+    const Noeud *trouverNoeudBordure(const std::vector<NPC*> &listeNPC, EHexCellDirection direction);
 };
 
 #endif // BOARD_H

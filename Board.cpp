@@ -1,6 +1,7 @@
 ﻿#include "Board.h"
 
-Board::Board(): mapnoeuds{}, goals{}, nombreTileMaxDroite{INT_MAX}, nombreTileMaxBas{INT_MAX}
+Board::Board(): mapnoeuds{}, goals{}, nombreTileMaxDroite{INT_MAX}, nombreTileMaxBas{INT_MAX},
+    nombreTileMaxDroitePair{INT_MAX}, nombreTileMaxDroiteImpair{INT_MAX}
 {
     
 }
@@ -222,48 +223,49 @@ void Board::calculerBordures(const std::vector<NPC*> &listeNPC)
     // La bordure gauche et haute sont définies par 0,0
     bool bordureChangee = false;
 
-    // Trouver la bordure droite
-    if (nombreTileMaxDroite == INT_MAX) {
-        for(NPC *pNPC : listeNPC) {
-            const Noeud *emplacement = pNPC->getEmplacement();
-            // TODO: on suppose pour l'instant une vision de 1
-
-            // S'il n'y a pas de mur pour bloquer la vue
-            if (!emplacement->hasOpaqueMur(EHexCellDirection::E)) {
-                Point pointE = emplacement->getPointNeighbour(EHexCellDirection::E);
-                const Noeud *noeudE = mapnoeuds.count(pointE) ? getNoeud(pointE) : nullptr;
-                // Les noeuds voisins existent forcément, sauf cas de bordure
-                if (noeudE == nullptr || noeudE->getTiletype() == TileType::Unknown) {
-                    int xMax = emplacement->point.q + 2 * emplacement->point.r;
-                    if (emplacement->point.q % 2 == 0) {
-                        // Cas d'un q pair : xMax est 1 plus à droite sur les lignes impaires
-                        ++xMax;
-                    }
-                    nombreTileMaxDroite = xMax;
-                    bordureChangee = true;
-                    break;
-                }
+    // Trouver la bordure Est
+    if (nombreTileMaxDroitePair == INT_MAX || nombreTileMaxDroiteImpair == INT_MAX) {
+        const Noeud *noeudBordureE = trouverNoeudBordure(listeNPC, EHexCellDirection::E);
+        if (noeudBordureE != nullptr) {
+            int xBordure = noeudBordureE->point.q + 2 * noeudBordureE->point.r;
+            // Selon le niveau, la bordure à droite peut être plus loin sur les q pairs et impairs
+            if (noeudBordureE->point.q % 2 == 0) {
+                nombreTileMaxDroitePair = xBordure;
+            } else {
+                nombreTileMaxDroiteImpair = xBordure;
             }
+            nombreTileMaxDroite = std::max(
+                // en ligne paire, la bordure peut être 1 plus à droite ou 1 à gauche
+                nombreTileMaxDroitePair == INT_MAX ? nombreTileMaxDroiteImpair + 1 : nombreTileMaxDroitePair,
+                // en ligne impaire, la bordure peut être 1 plus à droite ou 1 à gauche
+                nombreTileMaxDroiteImpair == INT_MAX ? nombreTileMaxDroitePair + 1 : nombreTileMaxDroiteImpair);
+            bordureChangee = true;
+        }
+
+        const Noeud *noeudBordureNE = trouverNoeudBordure(listeNPC, EHexCellDirection::NE);
+        if (noeudBordureNE != nullptr) {
+            int xBordure = noeudBordureNE->point.q + 2 * noeudBordureNE->point.r;
+            // Selon le niveau, la bordure à droite peut être plus loin sur les q pairs et impairs
+            if (noeudBordureNE->point.q % 2 == 0) {
+                nombreTileMaxDroiteImpair = xBordure - 1;
+            } else {
+                nombreTileMaxDroitePair = xBordure - 1;
+            }
+            nombreTileMaxDroite = std::max(
+                // en ligne paire, la bordure peut être 1 plus à droite ou 1 à gauche
+                nombreTileMaxDroitePair == INT_MAX ? nombreTileMaxDroiteImpair + 1 : nombreTileMaxDroitePair,
+                // en ligne impaire, la bordure peut être 1 plus à droite ou 1 à gauche
+                nombreTileMaxDroiteImpair == INT_MAX ? nombreTileMaxDroitePair + 1 : nombreTileMaxDroiteImpair);
+            bordureChangee = true;
         }
     }
 
-    // Trouver la bordure basse
+    // Trouver la bordure Sud
     if (nombreTileMaxBas == INT_MAX) {
-		for(NPC *pNPC : listeNPC) {
-            const Noeud *emplacement = pNPC->getEmplacement();
-            // TODO: on suppose pour l'instant une vision de 1
-
-            // S'il n'y a pas de mur pour bloquer la vue
-            if (!emplacement->hasOpaqueMur(EHexCellDirection::SE)) {
-                Point pointSE = emplacement->getPointNeighbour(EHexCellDirection::SE);
-                const Noeud *noeudSE = mapnoeuds.count(pointSE) ? getNoeud(pointSE) : nullptr;
-                // Les noeuds voisins existent forcément, sauf cas de bordure
-                if (noeudSE == nullptr || noeudSE->getTiletype() == TileType::Unknown) {
-                    nombreTileMaxBas = emplacement->point.q;
-                    bordureChangee = true;
-                    break;
-                }
-            }
+        const Noeud *noeudBordureSE = trouverNoeudBordure(listeNPC, EHexCellDirection::SE);
+        if (noeudBordureSE != nullptr) {
+            nombreTileMaxBas = noeudBordureSE->point.q;
+            bordureChangee = true;
         }
     }
 
@@ -279,4 +281,36 @@ void Board::calculerBordures(const std::vector<NPC*> &listeNPC)
             }
         }
     }
+}
+
+const Noeud *Board::trouverNoeudBordure(const std::vector<NPC*> &listeNPC, EHexCellDirection direction)
+{
+    for(NPC *pNPC : listeNPC) {
+        const Noeud *noeud = pNPC->getEmplacement();
+
+        for (int distance = 0; distance < pNPC->getVisionRange(); ++distance) {
+            // Arrêter si un mur bloque la vue
+            if (noeud->hasOpaqueMur(direction)) {
+                break;
+            }
+
+            Point pointSuivant = noeud->getPointNeighbour(direction);
+            // Vérifier que le point est possible avec les autres bordures
+            if (!pointEstPossible(pointSuivant)) {
+                break;
+            }
+
+            const Noeud *noeudSuivant = existNoeud(pointSuivant) ? getNoeud(pointSuivant) : nullptr;
+            // Les noeuds voisins existent forcément, sauf cas de bordure
+            if (noeudSuivant == nullptr || noeudSuivant->getTiletype() == TileType::Unknown) {
+                return noeud;
+            }
+
+            // Continuer depuis le nouveau noeud
+            noeud = noeudSuivant;
+        }
+    }
+
+    // Pas de noeud de bordure trouvé
+    return nullptr;
 }
