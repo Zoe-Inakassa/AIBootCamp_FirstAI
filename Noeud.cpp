@@ -148,8 +148,8 @@ Point Noeud::getPointNeighbour(EHexCellDirection cellDirection) const
 
 const float COEFFICIENT_VOISINS_UNKNOWN = 1;
 const float COEFFICIENT_DISTANCE_NPC = 2;
-const float COEFFICIENT_DISTANCE_GOAL = 0.25;
-float Noeud::getScoreExploration(int distanceNPC) const
+const float COEFFICIENT_DISTANCE_GOAL = 0.75;
+float Noeud::getScoreExploration(float distanceNPC) const
 {
     return COEFFICIENT_VOISINS_UNKNOWN * static_cast<float>(5-nbVoisinsUnknown)
         + static_cast<float>(distanceNPC) * COEFFICIENT_DISTANCE_NPC

@@ -138,8 +138,8 @@ void MyBotLogic::calculerScoreExploration(int nbToursRestants)
 
 		// Modifier la valeur pour prendre en compte le score du noeud
 		for (auto& noeud : noeudsAttaignables) {
-			int distance = pointNPC.calculerDistance(noeud.pnoeud->point);
-			float scoreExploration = noeud.pnoeud->getScoreExploration(distance);
+			float distanceNPC = noeud.score;
+			float scoreExploration = noeud.pnoeud->getScoreExploration(distanceNPC);
 			noeud.score = scoreExploration;
 		}
 		std::sort(noeudsAttaignables.begin(), noeudsAttaignables.end(),

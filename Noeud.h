@@ -82,7 +82,7 @@ public:
     int getNbVoisinsUnknown() const { return nbVoisinsUnknown; }
     int getDistanceVolGoal() const { return heuristiqueDistanceVolGoal; }
     void setDistanceVolGoal(int distance) { heuristiqueDistanceVolGoal = distance; }
-    float getScoreExploration(int distanceNPC) const;
+    float getScoreExploration(float distanceNPC) const;
 
     bool isANeighbour(const Noeud* neighbour) const;
 };
