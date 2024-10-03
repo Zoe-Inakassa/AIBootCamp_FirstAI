@@ -146,7 +146,7 @@ Point Noeud::getPointNeighbour(EHexCellDirection cellDirection) const
     throw std::exception("Unreachable");
 }
 
-const float COEFFICIENT_VOISINS_UNKNOWN = 1;
+const float COEFFICIENT_VOISINS_UNKNOWN = 2;
 const float COEFFICIENT_DISTANCE_NPC = 2;
 const float COEFFICIENT_DISTANCE_GOAL = 0.75;
 float Noeud::getScoreExploration(float distanceNPC) const
