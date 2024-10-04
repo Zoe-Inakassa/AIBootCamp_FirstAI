@@ -300,9 +300,13 @@ const Noeud *Board::trouverNoeudBordure(const std::vector<NPC*> &listeNPC, EHexC
                 break;
             }
 
-            const Noeud *noeudSuivant = existNoeud(pointSuivant) ? getNoeud(pointSuivant) : nullptr;
+            Noeud *noeudSuivant = existNoeud(pointSuivant) ? getNoeud(pointSuivant) : nullptr;
             // Les noeuds voisins existent forcément, sauf cas de bordure
             if (noeudSuivant == nullptr || noeudSuivant->getTiletype() == TileType::Unknown) {
+                if (noeudSuivant != nullptr) {
+                    // le noeud est en dehors de la carte
+                    noeudSuivant->setTiletype(TileType::Forbidden);
+                }
                 return noeud;
             }
 
