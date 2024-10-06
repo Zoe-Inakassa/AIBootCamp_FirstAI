@@ -104,7 +104,7 @@ def Debug [mapname: string@MapNames] {
 
 # Obtenir les informations du dernier replay
 def LastReplay [] {
-    let $replayfolder: string = (ls Replays | where type == dir | sort-by modified | last | get name)
+    let $replayfolder: string = (ls Replays | where type == dir and name =~ "2024...._......" | sort-by modified | last | get name)
     let $replayfile: string = (ls $replayfolder | where name =~ .replay | sort-by modified | last | get name)
     let $logfile: string = (ls $replayfolder | where name =~ .log | sort-by modified | last | get name)
     try {
@@ -114,6 +114,7 @@ def LastReplay [] {
             content:$content
             logfile:$logfile
             ok:true
+            nbTurns: ($content.turnsData | length)
         }
     } catch {
         print "Le fichier de replay est invalide. Le programme a planté ?"
@@ -122,6 +123,7 @@ def LastReplay [] {
             content:null
             logfile:$logfile
             ok:false
+            nbTurns: NaN
         }
     }
 }
