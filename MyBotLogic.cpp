@@ -260,7 +260,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			debugMapExploration(npc); //affichage des scores de décision pour chaque npc
 
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
-			if(!chemin.empty())
+			if(!chemin.empty() && npc.getState() == NPCState::EXPLORATION_PAUSE)
 			{
 				npc.setChemin(chemin);
 				npc.setState(NPCState::EXPLORATION);
