@@ -252,6 +252,10 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 		{
 			NPC &npc = *pNPC;
 
+			// ignorer les NPC en traint d'explorer
+			if (npc.getState() == NPCState::EXPLORATION)
+				continue;
+
 			// si un NPC ne bouge pas, il peut explorer au mieux
 			if (npc.getObjectif() == npc.getEmplacement() && !mapExplorationDistances.at(pNPC).empty()) {
 				npc.setObjectif(mapExplorationDistances.at(pNPC).front().pnoeud);
@@ -260,7 +264,7 @@ void MyBotLogic::GetTurnOrders(const STurnData& _turnData, std::list<SOrder>& _o
 			debugMapExploration(npc); //affichage des scores de décision pour chaque npc
 
 			std::vector<const Noeud*> chemin = AStar::calculerChemin(npc.getEmplacement(),npc.getObjectif());
-			if(!chemin.empty() && npc.getState() == NPCState::EXPLORATION_PAUSE)
+			if(!chemin.empty())
 			{
 				npc.setChemin(chemin);
 				npc.setState(NPCState::EXPLORATION);
